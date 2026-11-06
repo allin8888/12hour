@@ -33,6 +33,7 @@ h1{font-size:22px;margin:0 0 6px;}
 .card.full{grid-column:1 / -1;}
 .chart-box{position:relative;height:280px;}
 .chart-box.chart-tall{height:320px;}
+.chart-note{min-height:2.8em;margin-top:8px;color:var(--muted);font-size:11px;line-height:1.4;}
 canvas{max-height:320px;}
 table.heat{width:auto;border-collapse:collapse;font-size:12.5px;}
 table.heat th,table.heat td{border:1px solid var(--line);padding:6px 8px;text-align:center;min-width:46px;}
@@ -81,7 +82,7 @@ th.sortable .arr{color:var(--accent);font-size:10px;}
 <div class="wrap">
 
 <h1>6小时财经快讯 · 交互看板</h1>
-<div class="sub">生成时间 2026-11-06 20:50 ｜ 数据范围 10/15 09:08 ~ 11/6 19:56 ｜ 数据源 event_store（快讯单源，待核实）</div>
+<div class="sub">生成时间 2026-11-06 21:04 ｜ 数据范围 10/15 09:08 ~ 11/6 19:56 ｜ 数据源 event_store（快讯单源，待核实）</div>
 <div class="kpis">
   <div class="kpi"><div class="n">41452</div><div class="l">事件总数</div><div class="delta">▲ +923 vs 上窗</div></div>
   <div class="kpi"><div class="n">7015</div><div class="l">多源事件（≥2 源）</div><div class="delta">▲ +163 vs 上窗</div></div>
@@ -93,7 +94,8 @@ th.sortable .arr{color:var(--accent);font-size:10px;}
   <div class="card"><h2>事件量 / 窗口（多源 vs 单源）</h2><div class="chart-box"><canvas id="c1"></canvas></div></div>
   <div class="card"><h2>来源分布</h2><div class="chart-box"><canvas id="c2"></canvas></div></div>
   <div class="card full"><h2>主题热度时间轴（各主题逐窗提及数）</h2><div class="chart-box chart-tall"><canvas id="c3"></canvas></div></div>
-  <div class="card"><h2>多源 vs 单源占比</h2><div class="chart-box"><canvas id="c4"></canvas></div></div>
+  <div class="card"><h2>多源 vs 单源占比</h2><div class="chart-box"><canvas id="c4"></canvas></div><div class="chart-note">口径：同一快讯被 ≥2 个来源报道记为多源；全库 41452 个事件（总体结构）。</div></div>
+  <div class="card"><h2>各来源多源率对比（按比率降序）</h2><div class="chart-box"><canvas id="c5"></canvas></div><div class="chart-note">口径：按来源「出现次数」计，多源事件在其每个来源各计 1 次（各来源合计 ≠ 事件总数）；条形长度 = 该来源多源率，悬停看原始条数。</div></div>
 </div>
 <script>
 /* 图表先行：只依赖几 KB 聚合数据，且位于 13MB 明细数据之前。
@@ -105,6 +107,10 @@ var SRC_LABELS = ["新浪", "见闻", "同顺", "东财", "富途"];
 var SRC_DATA = [22326, 4871, 6708, 8211, 7438];
 var THEME_LABELS = ["其他", "算力/AI/半导体", "海外地缘", "油价/能源", "汇率/利率/贵金属", "消费/白酒", "汽车/华为链", "碳酸锂/新能源", "消费电子", "人形机器人"];
 var THEME_DATA = [[1076, 389, 892, 505, 968, 348, 818, 297, 999, 664, 394, 122, 133, 1, 107, 235, 7, 1582, 609, 1534, 931, 563, 1724, 485, 1432, 385, 1179, 1037, 281, 172], [146, 75, 135, 81, 146, 69, 142, 77, 98, 165, 74, 10, 22, 0, 19, 56, 2, 134, 95, 85, 163, 89, 98, 126, 97, 98, 122, 128, 41, 23], [64, 62, 45, 38, 53, 36, 87, 77, 70, 48, 45, 50, 23, 1, 79, 46, 0, 77, 58, 62, 40, 55, 96, 35, 141, 35, 103, 100, 45, 34], [67, 29, 53, 41, 66, 38, 76, 35, 110, 100, 36, 13, 6, 0, 23, 24, 0, 154, 53, 85, 63, 40, 86, 44, 60, 25, 36, 75, 26, 19], [65, 35, 64, 42, 97, 30, 103, 24, 53, 32, 49, 3, 6, 0, 1, 10, 4, 127, 17, 99, 76, 55, 92, 28, 59, 32, 43, 63, 24, 3], [45, 8, 18, 14, 22, 11, 67, 19, 10, 34, 12, 5, 3, 0, 8, 9, 1, 55, 13, 60, 22, 23, 12, 16, 24, 15, 10, 26, 2, 1], [24, 6, 59, 19, 33, 5, 26, 8, 26, 30, 10, 5, 33, 0, 4, 9, 0, 20, 3, 33, 78, 9, 20, 6, 29, 7, 16, 23, 4, 4], [41, 9, 32, 10, 34, 3, 22, 3, 4, 22, 9, 10, 12, 0, 2, 2, 0, 31, 5, 21, 38, 7, 25, 5, 25, 10, 27, 20, 5, 2], [10, 5, 0, 4, 5, 5, 10, 84, 6, 6, 0, 0, 1, 0, 1, 2, 0, 8, 4, 5, 4, 2, 4, 9, 5, 2, 9, 15, 3, 0], [5, 2, 11, 5, 11, 3, 8, 4, 7, 25, 10, 1, 0, 0, 0, 2, 0, 11, 4, 5, 13, 9, 16, 1, 13, 3, 5, 11, 2, 3]];
+var SRC_MS_LABELS = ["同顺  65.3%", "见闻  32.5%", "新浪  29.0%", "东财  25.2%", "富途  8.3%"];
+var SRC_MS_MULTI = [65.3, 32.5, 29.0, 25.2, 8.3];
+var SRC_MS_SINGLE = [34.7, 67.5, 71.0, 74.8, 91.7];
+var SRC_MS_RAW = [[4379, 2329], [1581, 3290], [6467, 15859], [2070, 6141], [620, 6818]];
 var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 var GRID = isDark ? '#2c323c' : '#e3e6ea';
 var TXT = isDark ? '#9aa4b2' : '#5b6570';
@@ -125,6 +131,17 @@ function drawCharts(){
   new Chart(document.getElementById('c4'),{type:'doughnut',data:{labels:['多源','单源'],
     datasets:[{data:[7015,41452-7015]}]},
     options:{maintainAspectRatio:false,animation:false,plugins:{legend:{position:'right'}}}});
+  /* c5：与 c4 同一行的「分来源下钻」——100% 堆叠横向条形，按多源率降序。
+     数据为构建期聚合的百分比 + 原始条数，位于明细之前、不引用明细数组。*/
+  new Chart(document.getElementById('c5'),{type:'bar',data:{labels:SRC_MS_LABELS,datasets:[
+    {label:'多源',data:SRC_MS_MULTI,backgroundColor:'#378add'},
+    {label:'单源',data:SRC_MS_SINGLE,backgroundColor:'#9ecae6'}
+  ]},options:{indexAxis:'y',maintainAspectRatio:false,animation:false,
+    scales:{x:{stacked:true,max:100,ticks:{callback:function(v){return v+'%';}}},y:{stacked:true}},
+    plugins:{tooltip:{callbacks:{label:function(ctx){
+      var r=SRC_MS_RAW[ctx.dataIndex];
+      return ctx.dataset.label+'：'+r[ctx.datasetIndex]+' 条（'+ctx.parsed.x.toFixed(1)+'%）';
+    }}}}}});
 }
 function whenChart(cb){
   if(window.Chart){cb();return;}
