@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>近12小时财经快讯交易筛选报告</title>
+<style>
+:root{--bg:#f7f8fa;--card:#ffffff;--text:#1f2328;--muted:#5b6570;--line:#e3e6ea;--accent:#1a56db;--head:#f0f3f8;--up:#e0463e;--down:#1aa05a;--flat:#5b6570;}
+*{box-sizing:border-box;}
+body{margin:0;padding:28px 16px 60px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.75;}
+.wrap{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+border-radius:10px;padding:32px 34px 48px;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+h1{font-size:26px;margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--accent);letter-spacing:.5px;}
+h2{font-size:20px;margin:34px 0 14px;padding-left:11px;border-left:5px solid var(--accent);}
+h3{font-size:17px;margin:26px 0 10px;color:#243b7a;}
+h4{font-size:15px;margin:18px 0 8px;color:var(--muted);}
+p{margin:9px 0;}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0;}
+ul,ol{margin:9px 0 9px 22px;padding:0;}
+li{margin:5px 0;}
+code{background:#f2f4f7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;}
+strong{color:#0b2f6b;}
+/* MP-3/MP-4 引用块与链接 */
+blockquote{margin:10px 0;padding:8px 14px;border-left:4px solid var(--accent);background:#f8fafc;color:var(--muted);border-radius:0 6px 6px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+/* P1-1 目录导航 */
+.toc{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 26px;}
+.toc-title{font-weight:600;margin-bottom:8px;color:var(--accent);}
+.toc ul{list-style:none;margin:0;padding-left:0;}
+.toc li{margin:4px 0;}
+.toc li.lv1{font-weight:600;}
+.toc li.lv3{padding-left:18px;font-size:13.5px;color:var(--muted);}
+.toc a{color:var(--accent);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+/* P1-2 宽表横向滚动 + 首列冻结 + 可滚动阴影提示 */
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:8px;
+box-shadow:inset -14px 0 12px -14px rgba(16,24,40,.18);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:900px;}
+th{background:var(--head);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);
+white-space:nowrap;color:#1c2b45;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+table th:first-child,table td:first-child{position:sticky;left:0;z-index:2;background:var(--card);}
+table th:first-child{background:var(--head);z-index:3;}
+tbody tr:nth-child(even){background:#fafbfc;}
+tbody tr:hover{background:#f0f5ff;}
+em{color:var(--muted);font-style:italic;}
+/* P0 sparkline 价格迷你图（明暗自适应，SVG 用 var(--accent)） */
+.spark{margin:14px 0;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);}
+.spark svg{display:block;width:100%;}
+.spark-empty{color:var(--muted);font-size:13px;}
+/* P1-1 涨跌语义（A 股惯例：涨红跌绿），统一 token */
+.move-up{color:var(--up);font-weight:600;}
+.move-down{color:var(--down);font-weight:600;}
+.move-flat{color:var(--flat);}
+/* P0-2 决策卡：一眼可见的交易结论 */
+.decision-card{margin:16px 0;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;background:linear-gradient(180deg,#fbfdff,#fff);}
+.decision-card.stance-up{border-left-color:var(--up);}
+.decision-card.stance-down{border-left-color:var(--down);}
+.decision-card.stance-flat,.decision-card.stance-watch{border-left-color:var(--muted);}
+.decision-card.stance-watch{border-left-color:#d98a00;}
+.dc-head{margin-bottom:6px;}
+.dc-stance{font-size:17px;font-weight:700;}
+.dc-stance.stance-up{color:var(--up);} .dc-stance.stance-down{color:var(--down);} .dc-stance.stance-flat,.dc-stance.stance-watch{color:var(--muted);} .dc-stance.stance-watch{color:#d98a00;}
+.dc-summary{margin:4px 0 10px;color:var(--text);}
+.dc-levels{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;}
+.dc-kv{display:flex;flex-direction:column;}
+.dc-k{font-size:12px;color:var(--muted);}
+.dc-v{font-size:15px;font-weight:600;}
+.dc-tlabel{font-size:12px;color:var(--muted);margin:4px 0 6px;}
+.dc-tickers{display:flex;flex-wrap:wrap;gap:8px;}
+.dc-tag{background:#f2f4f7;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;}
+.dc-tag i{color:var(--muted);font-style:normal;font-size:12px;}
+.decision-empty{color:var(--muted);border-left-color:var(--muted);}
+/* P0-2 数据不全横幅 */
+.banner-warn{margin:14px 0;padding:10px 14px;border:1px solid #f0c8c4;background:#fdf3f2;color:#b42318;border-radius:8px;font-weight:600;}
+/* P1-2 看板互链 */
+.dash-link{margin:14px 0;padding:9px 14px;border:1px solid var(--line);background:#f3f8ff;border-radius:8px;font-weight:600;}
+.dash-link a{color:var(--accent);}
+@media(prefers-color-scheme:dark){.banner-warn{background:#2a1c1b;border-color:#5b2a26;color:#ff9a8f;}.decision-card{background:linear-gradient(180deg,#1a2027,#1c2027);}.dash-link{background:#16202e;}}
+/* P2-4 移动端：表格不再强制 900px 最小宽度，表头允许换行（table 规则须置于块首） */
+@media(max-width:768px){table{min-width:0;font-size:12.5px;}th{white-space:normal;}body{padding:12px 6px;}.wrap{padding:18px 12px 32px;}h1{font-size:21px;}h2{font-size:17px;}.toc{padding:10px 12px;}}
+/* P2-2 深色模式（跟随系统） */
+@media(prefers-color-scheme:dark){
+:root{--bg:#15181d;--card:#1c2027;--text:#e6e9ef;--muted:#9aa4b2;--line:#2c323c;--accent:#6aa2ff;--head:#232a34;}
+code{background:#252b34;border-color:var(--line);}
+strong{color:#a9c6ff;}
+h3{color:#b9cdff;}
+.toc{background:#1a1f27;}
+blockquote{background:#1a1f27;}
+tbody tr:nth-child(even){background:#20252d;}
+tbody tr:hover{background:#26303d;}
+}
+/* P2-2 打印 / 导出 PDF */
+@media print{
+body{background:#fff;padding:0;}
+.wrap{border:0;box-shadow:none;max-width:none;padding:0;}
+.tw{overflow:visible;border:0;box-shadow:none;}
+table{min-width:0;font-size:11px;}
+th,td{padding:6px 8px;}
+table th:first-child,table td:first-child{position:static;}
+.toc{display:none;}
+h2{page-break-after:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv1"><a href="#s1">近12小时财经快讯交易筛选报告</a></li><li class="lv2"><a href="#s2">一、先看结论</a></li><li class="lv2"><a href="#s3">二、主题演进闭环表</a></li><li class="lv2"><a href="#s4">三、有效事件清单</a></li><li class="lv3"><a href="#s5">S级（强交易价值）</a></li><li class="lv3"><a href="#s6">A级（中等交易价值）</a></li><li class="lv3"><a href="#s7">B级（偏弱交易价值）</a></li><li class="lv2"><a href="#s8">四、主题归纳</a></li><li class="lv2"><a href="#s9">五、跨市场传导</a></li><li class="lv2"><a href="#s10">六、重点交易线索</a></li></ul></nav>
+<h1 id="s1">近12小时财经快讯交易筛选报告</h1>
+<p><strong>生成时间</strong>：2026-11-11 20:00 CST</p>
+<p><strong>覆盖区间</strong>：2026-11-11 08:01 — 2026-11-11 20:00（北京时间，约12h，含港股/美股盘前时段）</p>
+<p><strong>数据来源</strong>：新浪 / 同花顺 / 富途 / 华尔街见闻 / 东方财富（五源脚本采集）</p>
+<p><strong>统计行</strong>：rawRows 2007 → mergedEvents 1671 → chunks 335 per，multiSource 266（已完整读取 CHUNK1-5 + MULTI）</p>
+<hr>
+<h2 id="s2">一、先看结论</h2>
+<ol>
+<li><strong>S级 · 俄乌谈判突破</strong>：美俄乌阿布扎比三方会谈取得实质成果，双方原则上同意新一轮大规模战俘交换（每方超1000人），为"史上最大规模换俘"；库什纳将于12日赴莫斯科会见普京，年底前有望达成冲突解决方案。风险资产有利好支撑。
+</li>
+<li><strong>S级 · 美股芯片半导体盘前全线暴涨</strong>：英伟达+5%、AMD+6%、阿斯麦+4%、博通+6%，十倍做多半导体ETF（SOXX）盘前涨幅显著，高盛称英伟达/博通/AMD已入超卖配置区。AI算力需求叙事强化。
+</li>
+<li><strong>A级 · 央行Q3货政报告</strong>：明确"存款利率下降可为贷款利率下降创造空间"，释放后续降息预期信号；同时强调"防范汇率超调风险"，人民币双向波动常态化。
+</li>
+<li><strong>A级 · BNEF预测全球风电装机首降</strong>：2026年全球新增风电装机预计同比-15%，中国作为最大市场连续三年破纪录后放缓；但中国以外海上风电及存量改造创历史新高。
+</li>
+<li><strong>A级 · 培育钻石涨价+散热应用小批量落地</strong>：黄河旋风宣布大单晶产品11月起提价10%，四方达散热片小批量试样（上万元/片），行业盈利拐点待观察。
+</li>
+<li><strong>B级 · 多晶硅价格企稳但签单放缓</strong>：n型复投料4.30万/吨持平，颗粒硅4.00-4.10万/吨，成交企业仅1-2家，产业链价格传导不畅。
+</li>
+<li><strong>B级 · AI交易卷土重来</strong>：CoreWeave盘前+15%、NEBIUS +12%，业绩超预期缓解市场对AI基建投资放缓的担忧。
+</li>
+<li><strong>C级 · 俄柴油油轮滞留北大西洋</strong>：约4万吨俄柴油原定赴纽约，现目的地变更为"等待指令"，美方称希望在国际市场售出。
+</li>
+</ol>
+<hr>
+<h2 id="s3">二、主题演进闭环表</h2>
+<div class="tw"><table><thead><tr>
+<th>主题</th>
+<th>上次状态</th>
+<th>本窗裁定</th>
+<th>依据</th>
+</tr></thead><tbody>
+<tr>
+<td>俄乌谈判进程</td>
+<td>延续待验（11-07窗口）</td>
+<td><strong>证伪延续→新突破</strong></td>
+<td>三方会谈实质性成果，换俘规模创新高，年底前解决势头良好</td>
+</tr>
+<tr>
+<td>AI/芯片赛道情绪</td>
+<td>震荡分化</td>
+<td><strong>强劲修复</strong></td>
+<td>高盛评级+龙头业绩超预期+盘前集体大涨</td>
+</tr>
+<tr>
+<td>新能源发电装机趋势</td>
+<td>高增长预期</td>
+<td><strong>转向信号</strong></td>
+<td>BNEF预测首降15%，中国放缓但海外结构性亮点</td>
+</tr>
+<tr>
+<td>光伏硅料价格</td>
+<td>下行通道</td>
+<td><strong>企稳弱平衡</strong></td>
+<td>价格持平但成交量萎缩，供需再平衡进行中</td>
+</tr>
+<tr>
+<td>人民币汇率</td>
+<td>双向波动</td>
+<td><strong>政策护航+维稳预期</strong></td>
+<td>央行明确防超调、保基本稳定，双向波动制度化</td>
+</tr>
+<tr>
+<td>培育钻石产业</td>
+<td>概念炒作期</td>
+<td><strong>商业化早期落地</strong></td>
+<td>毛坯涨价函+散热片小批量，盈利拐点仍需跟踪</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s4">三、有效事件清单</h2>
+<h3 id="s5">S级（强交易价值）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件</th>
+<th>来源</th>
+<th>关联标的/方向</th>
+<th>映射入列</th>
+</tr></thead><tbody>
+<tr>
+<td>19:50</td>
+<td>美俄乌三方会谈成果公布，战俘交换超1000人/方，年底前有望达成协议</td>
+<td>新华社/CCTV/富途/同顺</td>
+<td>军工、避险资产、欧元</td>
+<td>地缘政治风险溢价回落</td>
+</tr>
+<tr>
+<td>19:13</td>
+<td>LATAM Airlines盘前跌超59%，现报$20</td>
+<td>同顺/新浪</td>
+<td>LATAM Airlines (LAN)</td>
+<td>航空债/信用利差关注</td>
+</tr>
+<tr>
+<td>18:22</td>
+<td>美股芯片半导体全线盘前大涨，英伟达+5%/AMD+6%/阿斯麦+4%</td>
+<td>东财/同顺/富途</td>
+<td>NVDA/AMD/ASML/Broadcom</td>
+<td>AI算力/半导体设备/存储链</td>
+</tr>
+</tbody></table></div>
+<h3 id="s6">A级（中等交易价值）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件</th>
+<th>来源</th>
+<th>关联标的/方向</th>
+<th>映射入列</th>
+</tr></thead><tbody>
+<tr>
+<td>18:23</td>
+<td>央行Q3货政报告：存款利率下降为贷款利率下降创造空间</td>
+<td>富途/新浪</td>
+<td>LPR、国债、银行息差</td>
+<td>利率敏感资产定价重估</td>
+</tr>
+<tr>
+<td>19:05</td>
+<td>BNEF预测全球风电新增装机同比下降15%，2022年来首降</td>
+<td>澎湃/富途</td>
+<td>风电整机/零部件/运营商</td>
+<td>新能源装机预测修正</td>
+</tr>
+<tr>
+<td>19:48</td>
+<td>培育钻石指数盘中涨超5%，黄河旋风宣布大单晶提价10%</td>
+<td>中国证券报/同顺</td>
+<td>力量钻石/四方达/黄河旋风/中兵红箭</td>
+<td>培育钻石/人造金刚石产业链</td>
+</tr>
+<tr>
+<td>19:50</td>
+<td>AI交易卷土重来，CoreWeave+15%/NEBIUS+12%</td>
+<td>东财/富途</td>
+<td>CoreWeave/NEBIUS/AI算力</td>
+<td>AI基础设施/云计算</td>
+</tr>
+</tbody></table></div>
+<h3 id="s7">B级（偏弱交易价值）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件</th>
+<th>来源</th>
+<th>关联标的/方向</th>
+</tr></thead><tbody>
+<tr>
+<td>19:41</td>
+<td>多晶硅价格持平，签单节奏放缓，成交企业仅1-2家</td>
+<td>东财/新浪</td>
+<td>隆基/通威/天合等光伏龙头</td>
+</tr>
+<tr>
+<td>18:51</td>
+<td>高盛研报：英伟达/博通/AMD芯片股已进入超卖配置区</td>
+<td>新浪</td>
+<td>NVDA/AVGO/AMD</td>
+</tr>
+<tr>
+<td>19:05</td>
+<td>中国国家能源局副局长汪剑波会见托克集团CEO，讨论能源安全</td>
+<td>富途/见闻</td>
+<td>石油/天然气贸易流向</td>
+</tr>
+<tr>
+<td>18:44</td>
+<td>俄柴油油轮滞留北大西洋，目的地变更"等待指令"</td>
+<td>富途/新浪</td>
+<td>原油/成品油运价/俄出口</td>
+</tr>
+<tr>
+<td>19:57</td>
+<td>全球化石燃料排放预计微降0.4%，清洁能源增速不足</td>
+<td>新华社</td>
+<td>ESG/碳交易/绿色电力</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s8">四、主题归纳</h2>
+<p><strong>主线1：地缘缓和叙事升温</strong> — 俄乌冲突出现近阶段最实质性外交突破，规模换俘+年底前解决预期，叠加美国能源部长回应俄柴油油轮"国际市场自有买家"表态，风险偏好边际改善。</p>
+<p><strong>主线2：AI算力赛道强势回归</strong> — 从CoreWeave业绩超预期到高盛密集唱多NVDA/AVGO/AMD，叠加英伟达+5%/AMD+6%等盘前行情，AI基础设施投资逻辑被重新定价。培育钻石散热应用小批量落地是边缘催化。</p>
+<p><strong>主线3：国内宏观政策延续宽松基调</strong> — 央行明确"存贷利差空间打开"暗示LPR仍有下调潜力，中小企业账款拖欠问题被点名，稳增长政策加码预期延续。</p>
+<p><strong>主线4：新能源发电周期拐点头信号</strong> — BNEF首次预测风电装机年度下降，与光伏硅料签单萎缩形成共振，供给侧出清信号值得跟踪。</p>
+<hr>
+<h2 id="s9">五、跨市场传导</h2>
+<div class="tw"><table><thead><tr>
+<th>域</th>
+<th>传导路径</th>
+<th>验证时点</th>
+</tr></thead><tbody>
+<tr>
+<td>港股</td>
+<td>俄乌缓和利好Risk-on资产（恒指成分中的中概股）；芯片大涨带动半导体ETF</td>
+<td>今日夜期已反映，明日开盘验证</td>
+</tr>
+<tr>
+<td>A股</td>
+<td>AI算力/培育钻石/风电/光伏产业链明日跟进行情；央行降息预期提振银行息差反转逻辑</td>
+<td>今日收盘后可核实；明日开盘确认</td>
+</tr>
+<tr>
+<td>大宗商品</td>
+<td>俄乌缓和压制原油风险溢价；俄柴油滞保留下供给扰动尾风险</td>
+<td>WTI/Brent夜期走势</td>
+</tr>
+<tr>
+<td>汇率</td>
+<td>人民币双向波动强化，防超调表态意味着央行干预意愿回升</td>
+<td>USD/CNH日内波动率</td>
+</tr>
+<tr>
+<td>美股</td>
+<td>芯片板块强势延续至开盘；LATAM黑天鹅需跟踪是否蔓延拉美航空债</td>
+<td>明早9:30 ET</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s10">六、重点交易线索</h2>
+<ol>
+<li><strong>AI算力链（N）</strong>：NVDA/AMD/ASML盘前已涨，若开盘后维持强势可考虑顺势；注意短期涨幅过快后的获利了结风险。
+</li>
+<li><strong>培育钻石/人造金刚石</strong>：黄河旋风提价10%为首个明确信号，产业链利润分配或向上游原材料倾斜，关注四方达散热片商业化进度。
+</li>
+<li><strong>风电装机衰退信号</strong>：BNEF数据与历史高增长预期存在分歧，警惕相关龙头股价的调整压力；但中国以外海上风电及存量改造仍是结构性机会。
+</li>
+<li><strong>利率敏感策略</strong>：央行"存降为贷降开路"表态明确，十年期国债收益率下行空间仍存，高等级信用债利差可能进一步压缩。
+</li>
+<li><strong>地缘对冲</strong>：若谈判进展顺利，黄金/军工短期承压；若出现反复（尤其欧洲安全架构谈判僵局），避险资产再度活跃。
+</li>
+</ol>
+<hr>
+<p><em>本报告由 finance-flash-12h skill v2026-11-07 自动生成，供交易参考，不构成投资建议。</em></p>
+</div>
+</body>
+</html>
