@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>近12小时财经快讯交易筛选报告</title>
+<style>
+:root{--bg:#f7f8fa;--card:#ffffff;--text:#1f2328;--muted:#5b6570;--line:#e3e6ea;--accent:#1a56db;--head:#f0f3f8;--up:#e0463e;--down:#1aa05a;--flat:#5b6570;}
+*{box-sizing:border-box;}
+body{margin:0;padding:28px 16px 60px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.75;}
+.wrap{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+border-radius:10px;padding:32px 34px 48px;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+h1{font-size:26px;margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--accent);letter-spacing:.5px;}
+h2{font-size:20px;margin:34px 0 14px;padding-left:11px;border-left:5px solid var(--accent);}
+h3{font-size:17px;margin:26px 0 10px;color:#243b7a;}
+h4{font-size:15px;margin:18px 0 8px;color:var(--muted);}
+p{margin:9px 0;}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0;}
+ul,ol{margin:9px 0 9px 22px;padding:0;}
+li{margin:5px 0;}
+code{background:#f2f4f7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;}
+strong{color:#0b2f6b;}
+/* MP-3/MP-4 引用块与链接 */
+blockquote{margin:10px 0;padding:8px 14px;border-left:4px solid var(--accent);background:#f8fafc;color:var(--muted);border-radius:0 6px 6px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+/* P1-1 目录导航 */
+.toc{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 26px;}
+.toc-title{font-weight:600;margin-bottom:8px;color:var(--accent);}
+.toc ul{list-style:none;margin:0;padding-left:0;}
+.toc li{margin:4px 0;}
+.toc li.lv1{font-weight:600;}
+.toc li.lv3{padding-left:18px;font-size:13.5px;color:var(--muted);}
+.toc a{color:var(--accent);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+/* P1-2 宽表横向滚动 + 首列冻结 + 可滚动阴影提示 */
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:8px;
+box-shadow:inset -14px 0 12px -14px rgba(16,24,40,.18);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:900px;}
+th{background:var(--head);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);
+white-space:nowrap;color:#1c2b45;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+table th:first-child,table td:first-child{position:sticky;left:0;z-index:2;background:var(--card);}
+table th:first-child{background:var(--head);z-index:3;}
+tbody tr:nth-child(even){background:#fafbfc;}
+tbody tr:hover{background:#f0f5ff;}
+em{color:var(--muted);font-style:italic;}
+/* P0 sparkline 价格迷你图（明暗自适应，SVG 用 var(--accent)） */
+.spark{margin:14px 0;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);}
+.spark svg{display:block;width:100%;}
+.spark-empty{color:var(--muted);font-size:13px;}
+/* P1-1 涨跌语义（A 股惯例：涨红跌绿），统一 token */
+.move-up{color:var(--up);font-weight:600;}
+.move-down{color:var(--down);font-weight:600;}
+.move-flat{color:var(--flat);}
+/* P0-2 决策卡：一眼可见的交易结论 */
+.decision-card{margin:16px 0;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;background:linear-gradient(180deg,#fbfdff,#fff);}
+.decision-card.stance-up{border-left-color:var(--up);}
+.decision-card.stance-down{border-left-color:var(--down);}
+.decision-card.stance-flat,.decision-card.stance-watch{border-left-color:var(--muted);}
+.decision-card.stance-watch{border-left-color:#d98a00;}
+.dc-head{margin-bottom:6px;}
+.dc-stance{font-size:17px;font-weight:700;}
+.dc-stance.stance-up{color:var(--up);} .dc-stance.stance-down{color:var(--down);} .dc-stance.stance-flat,.dc-stance.stance-watch{color:var(--muted);} .dc-stance.stance-watch{color:#d98a00;}
+.dc-summary{margin:4px 0 10px;color:var(--text);}
+.dc-levels{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;}
+.dc-kv{display:flex;flex-direction:column;}
+.dc-k{font-size:12px;color:var(--muted);}
+.dc-v{font-size:15px;font-weight:600;}
+.dc-tlabel{font-size:12px;color:var(--muted);margin:4px 0 6px;}
+.dc-tickers{display:flex;flex-wrap:wrap;gap:8px;}
+.dc-tag{background:#f2f4f7;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;}
+.dc-tag i{color:var(--muted);font-style:normal;font-size:12px;}
+.decision-empty{color:var(--muted);border-left-color:var(--muted);}
+/* P0-2 数据不全横幅 */
+.banner-warn{margin:14px 0;padding:10px 14px;border:1px solid #f0c8c4;background:#fdf3f2;color:#b42318;border-radius:8px;font-weight:600;}
+/* P1-2 看板互链 */
+.dash-link{margin:14px 0;padding:9px 14px;border:1px solid var(--line);background:#f3f8ff;border-radius:8px;font-weight:600;}
+.dash-link a{color:var(--accent);}
+@media(prefers-color-scheme:dark){.banner-warn{background:#2a1c1b;border-color:#5b2a26;color:#ff9a8f;}.decision-card{background:linear-gradient(180deg,#1a2027,#1c2027);}.dash-link{background:#16202e;}}
+/* P2-4 移动端：表格不再强制 900px 最小宽度，表头允许换行（table 规则须置于块首） */
+@media(max-width:768px){table{min-width:0;font-size:12.5px;}th{white-space:normal;}body{padding:12px 6px;}.wrap{padding:18px 12px 32px;}h1{font-size:21px;}h2{font-size:17px;}.toc{padding:10px 12px;}}
+/* P2-2 深色模式（跟随系统） */
+@media(prefers-color-scheme:dark){
+:root{--bg:#15181d;--card:#1c2027;--text:#e6e9ef;--muted:#9aa4b2;--line:#2c323c;--accent:#6aa2ff;--head:#232a34;}
+code{background:#252b34;border-color:var(--line);}
+strong{color:#a9c6ff;}
+h3{color:#b9cdff;}
+.toc{background:#1a1f27;}
+blockquote{background:#1a1f27;}
+tbody tr:nth-child(even){background:#20252d;}
+tbody tr:hover{background:#26303d;}
+}
+/* P2-2 打印 / 导出 PDF */
+@media print{
+body{background:#fff;padding:0;}
+.wrap{border:0;box-shadow:none;max-width:none;padding:0;}
+.tw{overflow:visible;border:0;box-shadow:none;}
+table{min-width:0;font-size:11px;}
+th,td{padding:6px 8px;}
+table th:first-child,table td:first-child{position:static;}
+.toc{display:none;}
+h2{page-break-after:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv1"><a href="#s1">12小时财经快讯交易筛选报告</a></li><li class="lv2"><a href="#s2">一、先看结论</a></li><li class="lv2"><a href="#s3">二、主题演进闭环表</a></li><li class="lv2"><a href="#s4">三、有效事件清单</a></li><li class="lv3"><a href="#s5">S级（直接影响跨市场定价）</a></li><li class="lv3"><a href="#s6">A级（影响单一赛道或区域市场）</a></li><li class="lv3"><a href="#s7">B级（次级影响或需观察）</a></li><li class="lv2"><a href="#s8">四、主题归纳</a></li><li class="lv2"><a href="#s9">五、跨市场传导</a></li><li class="lv2"><a href="#s10">六、重点交易线索</a></li></ul></nav>
+<h1 id="s1">12小时财经快讯交易筛选报告</h1>
+<p><strong>生成时间</strong>：2026-11-12 08:01 (北京)</p>
+<p><strong>覆盖区间</strong>：2026-11-11 08:01 ~ 2026-11-12 08:01 (北京时间)</p>
+<p><strong>已读取来源</strong>：新浪 / 华尔街见闻 / 同花顺 / 富途 / 东方财富（五源全覆盖）</p>
+<p><strong>统计行</strong>（来自 condense2.js 真实输出）：</p>
+<div class="tw"><table><thead><tr>
+<th>统计项</th>
+<th>数值</th>
+</tr></thead><tbody>
+<tr>
+<td>全窗口有效条数</td>
+<td>687</td>
+</tr>
+<tr>
+<td>多源一致条目</td>
+<td>109</td>
+</tr>
+<tr>
+<td>S级条目</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A级条目</td>
+<td>7</td>
+</tr>
+<tr>
+<td>B级条目</td>
+<td>16</td>
+</tr>
+<tr>
+<td>C级条目</td>
+<td>19</td>
+</tr>
+</tbody></table></div>
+<div class="spark spark-empty">价格走势图待生成（key=NASDAQ；运行 sparkline.py render-all 生成 sparklines.json）</div>
+<div class="spark spark-empty">价格走势图待生成（key=GOLD；运行 sparkline.py render-all 生成 sparklines.json）</div>
+<div class="spark spark-empty">价格走势图待生成（key=SXEUP；运行 sparkline.py render-all 生成 sparklines.json）</div>
+<div class="spark spark-empty">价格走势图待生成（key=OIL_BRENT；运行 sparkline.py render-all 生成 sparklines.json）</div>
+<h2 id="s2">一、先看结论</h2>
+<ol>
+<li><strong>【S】英伟达爆发治理危机，盘后跌超8%</strong>——纽约时报报道黄仁勋与高管存在婚外情，董事会周三开会讨论是否罢免CEO。NVDA盘前一度跌8%，AMD、博通跟跌。事件涉及公司治理红线，短期波动可控但中长期不确定性显著↑
+</li>
+<li><strong>【S】LME铝供应危机创30年纪录</strong>——现货升水147美元/吨，库存降至1990年以来最低，两家交易商控制60-80%可用库存。结构性短缺或推动铝价持续上移
+</li>
+<li><strong>【S】美联储加息路径全面重估</strong>——高盛、野村、德银同日上调加息预期，CME 12月加息25bp概率升至78%；古尔斯比称通胀数据"borderline disturbing"。美元续涨（ICE DXY 102.90，2025年5月以来最高），黄金跌破4000美元关口至3987美元
+</li>
+<li><strong>【S】CoreWeave逆市飙升24.7%</strong>——AI算力概念股业绩缓和市场担忧，回购持股表态提振信心。纳指收涨2.28%创近一年最佳单日表现，半导体指数涨5.6%收复11月5日全部失地
+</li>
+</ol>
+<h2 id="s3">二、主题演进闭环表</h2>
+<div class="tw"><table><thead><tr>
+<th>上一窗待验证项</th>
+<th>裁定</th>
+<th>当前状态</th>
+<th>证据强度</th>
+</tr></thead><tbody>
+<tr>
+<td>黄仁勋婚外情调查进展</td>
+<td>✅ 成立</td>
+<td>董事会周三召开会议，讨论罢免可能性；盘后NVDA跌超8%</td>
+<td>强——路透独家+NYT报道</td>
+</tr>
+<tr>
+<td>美联储鹰派信号持续？</td>
+<td>✅ 证伪反转→强化</td>
+<td>古尔斯比"borderline disturbing"评价，高盛/野村/德银同日上调加息路径，12月加息25bp概率78%</td>
+<td>强</td>
+</tr>
+<tr>
+<td>铝供应紧张能否传导至价格？</td>
+<td>✅ 成立</td>
+<td>LME铝现货升水147美元/吨创30年新高，库存降至1990年以来最低</td>
+<td>强</td>
+</tr>
+<tr>
+<td>AI投资热是否退潮？</td>
+<td>❌ 未证伪但分化</td>
+<td>CoreWeave +24.7% vs Sixt街警告"投机狂热"；AI贷款资本规则辩论升温</td>
+<td>中</td>
+</tr>
+<tr>
+<td>油价是否受中东风险支撑？</td>
+<td>⏳ 延续待验</td>
+<td>沙特10月产量激增至1,056万桶/日创战争前新高，压低下行情；伊朗坚持海峡七项条件</td>
+<td>中</td>
+</tr>
+</tbody></table></div>
+<h2 id="s4">三、有效事件清单</h2>
+<h3 id="s5">S级（直接影响跨市场定价）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间(京)</th>
+<th>关键词</th>
+<th>类型</th>
+<th>核心事实</th>
+<th>已验证进展</th>
+<th>映射标的</th>
+<th>方向</th>
+<th>需验证项</th>
+</tr></thead><tbody>
+<tr>
+<td>07:25</td>
+<td>英伟达罢免CEO</td>
+<td>公司治理·科技</td>
+<td>董事会周三开会决定是否罢免黄仁勋；婚外情报道发酵</td>
+<td>新增：调查启动+CEO留任待定</td>
+<td>NVDA、AMD、TSM、000660.KS</td>
+<td>▼短期利空，▲AI板块情绪修复</td>
+<td>🔴 董事会结果（预计明日）</td>
+</tr>
+<tr>
+<td>06:22</td>
+<td>LME铝供应危机</td>
+<td>商品·供给侧</td>
+<td>现货升水147美元/吨，库存1990年以来最低，两家交易商控60-80%仓单</td>
+<td>新增：Tom/Next价差31.73美元/吨为2021年以来最高</td>
+<td>伦铝期货、中国铝业、东方希望、工业金属ETF</td>
+<td>▲结构性做多铝</td>
+<td>🟡 交割压力是否缓解</td>
+</tr>
+<tr>
+<td>07:20</td>
+<td>美联储12月加息</td>
+<td>宏观·货币</td>
+<td>高盛/野村/德银同日上调路径；CME 12月25bp概率78%；古尔斯比通胀表态</td>
+<td>新增：三大投行共识强化</td>
+<td>黄金、美债、成长股估值</td>
+<td>▼利空贵金属和高估值</td>
+<td>🔴 周五非农就业数据</td>
+</tr>
+<tr>
+<td>06:30</td>
+<td>CoreWeave业绩反转</td>
+<td>资本市场·AI</td>
+<td>上调年度营收预测，拟通过投资级贷款募资40亿美元；CEO取消出售持股</td>
+<td>新增：CoreWeave +24.7%创2025年6月以来最大单日涨幅</td>
+<td>AWS、MSFT、GOOGL、AI算力ETF</td>
+<td>▲AI算力链情绪修复</td>
+<td>🟡 40亿贷款发行进度</td>
+</tr>
+</tbody></table></div>
+<h3 id="s6">A级（影响单一赛道或区域市场）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间(京)</th>
+<th>关键词</th>
+<th>类型</th>
+<th>核心事实</th>
+<th>已验证进展</th>
+<th>映射标的</th>
+<th>方向</th>
+<th>需验证项</th>
+</tr></thead><tbody>
+<tr>
+<td>07:20</td>
+<td>美元续涨创18个月高</td>
+<td>外汇</td>
+<td>ICE DXY 102.90，欧元跌至1.1092（2025年5月以来新低）</td>
+<td>新增：避险需求+加息押注双驱动</td>
+<td>EURUSD、USDJPY、新兴市场货币</td>
+<td>▼承压非美货币</td>
+<td>🔴 12月FOMC表态</td>
+</tr>
+<tr>
+<td>20:56</td>
+<td>优必选获6500万机器人订单</td>
+<td>科技·商业</td>
+<td>永达汽车采购400台U1 Pro（16.98万/台），首个超仿生人形机器人大额订单</td>
+<td>新增：人形机器人商业化首单确认</td>
+<td>UBTECH、机器人产业链</td>
+<td>▲人形机器人板块情绪催化</td>
+<td>🟡 交付进度跟踪</td>
+</tr>
+<tr>
+<td>23:47</td>
+<td>Marsh游说放宽AI贷款监管</td>
+<td>金融监管</td>
+<td>Marsh游说美联储下调AI数据中心信贷资本计提要求；巴克莱寻求100亿美元信用保险</td>
+<td>新增：AI贷款监管松绑信号初现</td>
+<td>银行股、AI基建融资</td>
+<td>▲利好AI信贷扩张</td>
+<td>🟡 年底前美联储决定</td>
+</tr>
+<tr>
+<td>06:15</td>
+<td>沙特原油产量激增26%</td>
+<td>能源</td>
+<td>10月产量1,056万桶/日，创战争前新高，接近配额</td>
+<td>新增：OPEC供应端宽松信号</td>
+<td>布伦特原油、沙特阿美</td>
+<td>▼压低油价上行空间</td>
+<td>🔴 霍尔木兹海峡通航状况</td>
+</tr>
+<tr>
+<td>07:50</td>
+<td>日本外资大转向</td>
+<td>资本市场·亚洲</td>
+<td>日股外资从净买11293亿转为净卖1052亿日元；日本企业商品物价指数环比+0.7%超预期</td>
+<td>新增：外资撤离日股迹象</td>
+<td>日经225、日本利率债</td>
+<td>▼日元承压</td>
+<td>🟡 日本央行干预力度</td>
+</tr>
+<tr>
+<td>06:02</td>
+<td>现货黄金跌破4000</td>
+<td>商品</td>
+<td>纽约尾盘报3987.88美元/盎司，日内高点4067后大幅下挫</td>
+<td>新增：加息预期+美元强势双杀金价</td>
+<td>黄金ETF、紫金矿业、山金</td>
+<td>▼短期空头主导</td>
+<td>🔴 地缘风险溢价能否反弹</td>
+</tr>
+</tbody></table></div>
+<h3 id="s7">B级（次级影响或需观察）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间(京)</th>
+<th>关键词</th>
+<th>类型</th>
+<th>核心事实</th>
+<th>映射标的</th>
+</tr></thead><tbody>
+<tr>
+<td>23:59</td>
+<td>纳指+2.3%半导体+5.6%</td>
+<td>美股</td>
+<td>费城半导体收复11月5日全部跌幅；闪迪+15.4%领涨</td>
+<td>SMH、SOXX、NVDA</td>
+</tr>
+<tr>
+<td>06:03</td>
+<td>MSCI剔除MSTR和凯雷</td>
+<td>指数调整</td>
+<td>Strategy Inc和凯雷被移出MSCI全球标准指数</td>
+<td>MSTR、Karur</td>
+</tr>
+<tr>
+<td>01:49</td>
+<td>德国10年国债收益率3.316%</td>
+<td>欧债</td>
+<td>2/10利差收窄至+19.3bp，逼近2024年12月底部</td>
+<td>DB10Y、Euribor</td>
+</tr>
+<tr>
+<td>23:30</td>
+<td>Anthropic IPO认购超配</td>
+<td>AI/VC</td>
+<td>目标估值1.4万亿美元；追加114亿美元算力采购订单</td>
+<td>ETHR.F、AI创投</td>
+</tr>
+<tr>
+<td>01:10</td>
+<td>英国防数据中心无序扩张</td>
+<td>政策</td>
+<td>推出"数据中心公约"限制AI基础设施无序发展</td>
+<td>UK基建、能源股</td>
+</tr>
+<tr>
+<td>03:28</td>
+<td>Lithium Americas成本上调9亿</td>
+<td>矿业</td>
+<td>关税推高内华达州锂矿建设成本，股价触历史新低</td>
+<td>锂矿股、电动车上游</td>
+</tr>
+<tr>
+<td>02:53</td>
+<td>俄波罗的海港口遭袭</td>
+<td>地缘</td>
+<td>乌军袭击乌斯季卢加港石油设施，俄乌谈判前夕</td>
+<td>布伦特原油、欧洲能源</td>
+</tr>
+<tr>
+<td>20:01</td>
+<td>美国发探路者卫星成功</td>
+<td>航天</td>
+<td>长征二号丁第677次飞行成功发射</td>
+<td>航天军工板块</td>
+</tr>
+<tr>
+<td>06:34</td>
+<td>氯化亚砜一年涨价近3倍</td>
+<td>化工</td>
+<td>百川盈孚：国内均价6174元/吨，同比涨297.8%</td>
+<td>电解液产业链</td>
+</tr>
+<tr>
+<td>04:34</td>
+<td>微软自担数据中心电力成本</td>
+<td>AI基建</td>
+<td>不依赖政府补贴，2028年Project Kilby启动</td>
+<td>MSFT、公用事业</td>
+</tr>
+<tr>
+<td>01:51</td>
+<td>LME伦铜涨138美元至13817</td>
+<td>有色</td>
+<td>LME铜/铝/镍/锡普遍上涨</td>
+<td>伦铜期货、紫金矿业</td>
+</tr>
+<tr>
+<td>06:46</td>
+<td>券商把脉2027港股</td>
+<td>策略</td>
+<td>红利打底+成长进攻；看好生物科技/AI应用/智能驾驶</td>
+<td>港股ETF、恒生科技</td>
+</tr>
+<tr>
+<td>06:43</td>
+<td>CoreWeave拟募资40亿美元</td>
+<td>AI金融</td>
+<td>摩根士丹利牵头银团贷款，分阶段发行</td>
+<td>CRWV、AI杠杆</td>
+</tr>
+<tr>
+<td>06:29</td>
+<td>21只基金同日成立规模9617亿</td>
+<td>公募</td>
+<td>年内新发基金规模近万亿，债基冰火两重天</td>
+<td>公募龙头、债市</td>
+</tr>
+<tr>
+<td>01:58</td>
+<td>南非需额外390亿美元投资</td>
+<td>宏观</td>
+<td>固定资产投资需从14%提升至18-20%</td>
+<td>南非兰特、非洲基建</td>
+</tr>
+<tr>
+<td>22:01</td>
+<td>美联储应放松AI贷款监管</td>
+<td>监管</td>
+<td>Marsh敦促降低AI信贷资本要求，银行转向AI贷款转移风险</td>
+<td>硅谷银行、SI银行</td>
+</tr>
+</tbody></table></div>
+<h2 id="s8">四、主题归纳</h2>
+<ol>
+<li><strong>AI算力链：情绪修复但隐忧犹存</strong>——CoreWeave +24.7%带动半导体板块全面反攻，费城半导体指数收复全部失地。但Sixth Street CEO警告"投机狂热"，Marsh同时游说放松AI贷款监管——表明行业分化加剧。Anthropic估值1.4万亿美元+114亿订单叠加，AI基建资本开支逻辑未变，但估值分歧扩大。
+</li>
+</ol>
+<ol>
+<li><strong>美联储鹰派共识强化</strong>——三大投行（高盛/野村/德银）同日上调加息路径，古尔斯比"borderline disturbing"措辞罕见。12月25bp概率78%已被完全定价，明年1月累计加息25bp概率67.1%。美元续涨压制非美资产，黄金失守4000关口。
+</li>
+</ol>
+<ol>
+<li><strong>商品供给侧冲击集中爆发</strong>——LME铝供应危机（现货升水30年新高）、 lithium Americas成本飙升（关税推高9亿美元）、氯化亚砜三年暴涨近3倍。供给约束而非需求拉动成为本轮大宗商品定价主驱动，结构性机会显性化。
+</li>
+</ol>
+<ol>
+<li><strong>中东局势复杂化</strong>——沙特产量激增26%压低下行情，但伊朗坚持海峡七项条件；胡塞武装袭击沙特机场、乌军袭击俄波罗的海港——多空因素交织，油价方向不明。霍尔木兹海峡仍是最大变量。
+</li>
+</ol>
+<ol>
+<li><strong>人形机器人商业化破冰</strong>——优必选6500万订单为首个超仿生人形机器人大额订单，验证商业化落地能力。长期看人形机器人渗透率仍处早期，短期情绪催化为主。
+</li>
+</ol>
+<ol>
+<li><strong>公司治理风暴扩散至英伟达</strong>——从AI芯片龙头到整个科技板块的治理风险重新定价。黄仁勋去留直接关系英伟达股价走势及AI生态稳定，董事会决议是关键观测点。
+</li>
+</ol>
+<h2 id="s9">五、跨市场传导</h2>
+<p>```</p>
+<p>美联储加息预期强化 ──────► 美元续涨 ──────► 非美货币承压</p>
+<p>│                                              │</p>
+<p>▼                                              ▼</p>
+<p>金价跌破4000 ────► 贵金属板块走弱          新兴市场资金流出（巴西警报）</p>
+<p>│                                              │</p>
+<p>▼                                              ▼</p>
+<p>债市收益率上行 ────► 高估值成长股承压      汇率波动加大套保需求</p>
+<p>```</p>
+<p><strong>关键传导节点</strong>：</p>
+<ul>
+<li>周五美国首次申请失业救济人数 + 10月成屋销售 → 决定12月加息概率走向
+</li>
+<li>周一亚太开盘 → 验证黄金4000支撑位能否守住
+</li>
+<li>本周三英伟达董事会决议 → 科技板块风险偏好重置
+</li>
+</ul>
+<h2 id="s10">六、重点交易线索</h2>
+<div class="tw"><table><thead><tr>
+<th>优先级</th>
+<th>标的/方向</th>
+<th>触发条件</th>
+<th>操作逻辑</th>
+</tr></thead><tbody>
+<tr>
+<td>🔴 S</td>
+<td>英伟达(NVDA)</td>
+<td>董事会表决结果</td>
+<td>若保送→AI板块情绪修复加速；若罢免→科技板块深度调整</td>
+</tr>
+<tr>
+<td>🔴 S</td>
+<td>LME铝期货 / 中国铝业</td>
+<td>现货升水持续 &gt;100美元</td>
+<td>供给侧结构性机会，库存低位支撑</td>
+</tr>
+<tr>
+<td>🟡 A</td>
+<td>黄金多头止损线</td>
+<td>跌破3950美元</td>
+<td>技术面破位+基本面鹰派共振</td>
+</tr>
+<tr>
+<td>🟡 A</td>
+<td>美元/日元</td>
+<td>突破160整数关口</td>
+<td>日本央行可能干预的信号</td>
+</tr>
+<tr>
+<td>🟡 A</td>
+<td>沙特阿美 / 石油股</td>
+<td>霍尔木兹海峡通航恶化</td>
+<td>地缘风险溢价回升</td>
+</tr>
+<tr>
+<td>🟢 B</td>
+<td>人形机器人产业链</td>
+<td>优必选交付进度</td>
+<td>商业化里程碑验证</td>
+</tr>
+<tr>
+<td>🟢 B</td>
+<td>AI信贷相关银行股</td>
+<td>Marsh游说结果</td>
+<td>监管松绑释放资本空间</td>
+</tr>
+</tbody></table></div>
+<hr>
+<p><em>数据来源：新浪 / 华尔街见闻 / 同花顺 / 富途 / 东方财富（五源交叉验证）</em></p>
+<p><em>统计行来自 condense2.js 脚本输出，已核实无误</em></p>
+<p><em>报告完毕 — 下次增量窗口起点：2026-11-12 08:01（北京时间）</em></p>
+</div>
+</body>
+</html>
