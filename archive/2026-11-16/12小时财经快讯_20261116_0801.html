@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>近12小时财经快讯交易筛选报告</title>
+<style>
+:root{--bg:#f7f8fa;--card:#ffffff;--text:#1f2328;--muted:#5b6570;--line:#e3e6ea;--accent:#1a56db;--head:#f0f3f8;--up:#e0463e;--down:#1aa05a;--flat:#5b6570;}
+*{box-sizing:border-box;}
+body{margin:0;padding:28px 16px 60px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.75;}
+.wrap{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+border-radius:10px;padding:32px 34px 48px;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+h1{font-size:26px;margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--accent);letter-spacing:.5px;}
+h2{font-size:20px;margin:34px 0 14px;padding-left:11px;border-left:5px solid var(--accent);}
+h3{font-size:17px;margin:26px 0 10px;color:#243b7a;}
+h4{font-size:15px;margin:18px 0 8px;color:var(--muted);}
+p{margin:9px 0;}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0;}
+ul,ol{margin:9px 0 9px 22px;padding:0;}
+li{margin:5px 0;}
+code{background:#f2f4f7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;}
+strong{color:#0b2f6b;}
+/* MP-3/MP-4 引用块与链接 */
+blockquote{margin:10px 0;padding:8px 14px;border-left:4px solid var(--accent);background:#f8fafc;color:var(--muted);border-radius:0 6px 6px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+/* P1-1 目录导航 */
+.toc{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 26px;}
+.toc-title{font-weight:600;margin-bottom:8px;color:var(--accent);}
+.toc ul{list-style:none;margin:0;padding-left:0;}
+.toc li{margin:4px 0;}
+.toc li.lv1{font-weight:600;}
+.toc li.lv3{padding-left:18px;font-size:13.5px;color:var(--muted);}
+.toc a{color:var(--accent);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+/* P1-2 宽表横向滚动 + 首列冻结 + 可滚动阴影提示 */
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:8px;
+box-shadow:inset -14px 0 12px -14px rgba(16,24,40,.18);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:900px;}
+th{background:var(--head);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);
+white-space:nowrap;color:#1c2b45;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+table th:first-child,table td:first-child{position:sticky;left:0;z-index:2;background:var(--card);}
+table th:first-child{background:var(--head);z-index:3;}
+tbody tr:nth-child(even){background:#fafbfc;}
+tbody tr:hover{background:#f0f5ff;}
+em{color:var(--muted);font-style:italic;}
+/* P0 sparkline 价格迷你图（明暗自适应，SVG 用 var(--accent)） */
+.spark{margin:14px 0;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);}
+.spark svg{display:block;width:100%;}
+.spark-empty{color:var(--muted);font-size:13px;}
+/* P1-1 涨跌语义（A 股惯例：涨红跌绿），统一 token */
+.move-up{color:var(--up);font-weight:600;}
+.move-down{color:var(--down);font-weight:600;}
+.move-flat{color:var(--flat);}
+/* P0-2 决策卡：一眼可见的交易结论 */
+.decision-card{margin:16px 0;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;background:linear-gradient(180deg,#fbfdff,#fff);}
+.decision-card.stance-up{border-left-color:var(--up);}
+.decision-card.stance-down{border-left-color:var(--down);}
+.decision-card.stance-flat,.decision-card.stance-watch{border-left-color:var(--muted);}
+.decision-card.stance-watch{border-left-color:#d98a00;}
+.dc-head{margin-bottom:6px;}
+.dc-stance{font-size:17px;font-weight:700;}
+.dc-stance.stance-up{color:var(--up);} .dc-stance.stance-down{color:var(--down);} .dc-stance.stance-flat,.dc-stance.stance-watch{color:var(--muted);} .dc-stance.stance-watch{color:#d98a00;}
+.dc-summary{margin:4px 0 10px;color:var(--text);}
+.dc-levels{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;}
+.dc-kv{display:flex;flex-direction:column;}
+.dc-k{font-size:12px;color:var(--muted);}
+.dc-v{font-size:15px;font-weight:600;}
+.dc-tlabel{font-size:12px;color:var(--muted);margin:4px 0 6px;}
+.dc-tickers{display:flex;flex-wrap:wrap;gap:8px;}
+.dc-tag{background:#f2f4f7;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;}
+.dc-tag i{color:var(--muted);font-style:normal;font-size:12px;}
+.decision-empty{color:var(--muted);border-left-color:var(--muted);}
+/* P0-2 数据不全横幅 */
+.banner-warn{margin:14px 0;padding:10px 14px;border:1px solid #f0c8c4;background:#fdf3f2;color:#b42318;border-radius:8px;font-weight:600;}
+/* P1-2 看板互链 */
+.dash-link{margin:14px 0;padding:9px 14px;border:1px solid var(--line);background:#f3f8ff;border-radius:8px;font-weight:600;}
+.dash-link a{color:var(--accent);}
+@media(prefers-color-scheme:dark){.banner-warn{background:#2a1c1b;border-color:#5b2a26;color:#ff9a8f;}.decision-card{background:linear-gradient(180deg,#1a2027,#1c2027);}.dash-link{background:#16202e;}}
+/* P2-4 移动端：表格不再强制 900px 最小宽度，表头允许换行（table 规则须置于块首） */
+@media(max-width:768px){table{min-width:0;font-size:12.5px;}th{white-space:normal;}body{padding:12px 6px;}.wrap{padding:18px 12px 32px;}h1{font-size:21px;}h2{font-size:17px;}.toc{padding:10px 12px;}}
+/* P2-2 深色模式（跟随系统） */
+@media(prefers-color-scheme:dark){
+:root{--bg:#15181d;--card:#1c2027;--text:#e6e9ef;--muted:#9aa4b2;--line:#2c323c;--accent:#6aa2ff;--head:#232a34;}
+code{background:#252b34;border-color:var(--line);}
+strong{color:#a9c6ff;}
+h3{color:#b9cdff;}
+.toc{background:#1a1f27;}
+blockquote{background:#1a1f27;}
+tbody tr:nth-child(even){background:#20252d;}
+tbody tr:hover{background:#26303d;}
+}
+/* P2-2 打印 / 导出 PDF */
+@media print{
+body{background:#fff;padding:0;}
+.wrap{border:0;box-shadow:none;max-width:none;padding:0;}
+.tw{overflow:visible;border:0;box-shadow:none;}
+table{min-width:0;font-size:11px;}
+th,td{padding:6px 8px;}
+table th:first-child,table td:first-child{position:static;}
+.toc{display:none;}
+h2{page-break-after:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv1"><a href="#s1">近12小时财经快讯 · 交易筛选报告</a></li><li class="lv2"><a href="#s2">一、先看结论（≤5 条）</a></li><li class="lv2"><a href="#s3">二、主题演进闭环表</a></li><li class="lv2"><a href="#s4">三、有效事件清单</a></li><li class="lv3"><a href="#s5">S 级（≥3源 / 明确交易影响）</a></li><li class="lv3"><a href="#s6">A 级（2源或高相关性）</a></li><li class="lv3"><a href="#s7">B 级</a></li><li class="lv2"><a href="#s8">四、主题归纳</a></li><li class="lv3"><a href="#s9">🔴 主题一：霍尔木兹海峡-沙特东部能源走廊安全危机升级</a></li><li class="lv3"><a href="#s10">🔴 主题二：英伟达治理危机向制度层面蔓延</a></li><li class="lv3"><a href="#s11">🟡 主题三：美联储内部鹰鸽分歧加剧</a></li><li class="lv3"><a href="#s12">🟡 主题四：海外资金持续流入中国资产</a></li><li class="lv2"><a href="#s13">五、跨市场传导</a></li><li class="lv2"><a href="#s14">六、重点交易线索</a></li><li class="lv3"><a href="#s15">🔥 短线观察（T+1 ~ T+3）</a></li><li class="lv3"><a href="#s16">📈 中线布局（周度视角）</a></li></ul></nav>
+<h1 id="s1">近12小时财经快讯 · 交易筛选报告</h1>
+<p><strong>生成时间</strong>：2026-11-16 08:01 北京</p>
+<p><strong>覆盖区间</strong>：2026-11-15 20:00 ～ 2026-11-16 08:01（北京时间）</p>
+<p><strong>已读来源</strong>：新浪 / 同花顺 / 富途 / 华尔街见闻 / 东方财富</p>
+<p><strong>采集总条数</strong>：561 rawRows → 去重合并 503 mergedEvents，多源交叉 47 条</p>
+<hr>
+<h2 id="s2">一、先看结论（≤5 条）</h2>
+<div class="tw"><table><thead><tr>
+<th>级别</th>
+<th>主题</th>
+<th>交易含义</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>S</strong></td>
+<td>胡塞武装连续袭击沙特东部石油基础设施，原油暗盘突破87美元；金价突破3850美元/盎司新高</td>
+<td>油气链短期定价权重估，避险资产延续强势</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>黄仁勋风波升级：贝森特效限期10天要求外部换帅，众议院听证在即</td>
+<td>全球算力龙头治理风险显性化，关注NVDA及A股替代链波动</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>美联储施密德鹰派发言叠加贝森特警告勿过度紧缩，双重信号压制加息预期</td>
+<td>美债收益率12月会议仍偏博弈，美元短线承压</td>
+</tr>
+<tr>
+<td><strong>A</strong></td>
+<td>高盛将H股指向上调至超配，预计MSCI中国指数明年涨23%</td>
+<td>A/港股中期配置机会，关注外资加仓主线</td>
+</tr>
+<tr>
+<td><strong>A</strong></td>
+<td>新版国家医保目录落地（新增107种，51个1类新药），复星/恒瑞等密集公告</td>
+<td>创新药企估值再平衡窗口，但落地节奏分化</td>
+</tr>
+</tbody></table></div>
+<p><strong>无S级新增交易价值项时本栏应写「近 12 小时无足够交易价值新增事件」——本期有。</strong></p>
+<hr>
+<h2 id="s3">二、主题演进闭环表</h2>
+<div class="tw"><table><thead><tr>
+<th>上期待验证项</th>
+<th>裁定</th>
+<th>证据</th>
+</tr></thead><tbody>
+<tr>
+<td>胡塞武装对沙特石油设施的威胁是否持续</td>
+<td>✅ 成立</td>
+<td>胡塞用弹道导弹袭击利雅得哈立德国王机场及金融中心，并用无人机打击东西向输油管道泵站（23:21-02:03 多源确认）</td>
+</tr>
+<tr>
+<td>美伊局势是否会引发新一轮军事升级</td>
+<td>⏳ 延续待验</td>
+<td>美国已部署3艘航母于CENTCOM区域，鲁比奥与伊朗外长言辞交锋；以色列消息人士称美国近期不会立即空袭，但"随时可能变化"</td>
+</tr>
+<tr>
+<td>黄仁勋风波是否会在本周内产生治理结果</td>
+<td>⏳ 延续待验</td>
+<td>贝森特效限10天回应合规；众议院听证日期正在协调中（预计下周）</td>
+</tr>
+<tr>
+<td>外资对中国资产的看多逻辑能否兑现</td>
+<td>🔄 证伪待验</td>
+<td>巴克莱/花旗/富达三季度13F明显加仓中概互联网，巴里持续买入京东看涨期权+比亚迪；但需观察A股实际资金流向</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s4">三、有效事件清单</h2>
+<h3 id="s5">S 级（≥3源 / 明确交易影响）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>关键词</th>
+<th>类别</th>
+<th>评分</th>
+<th>来源</th>
+<th>摘要</th>
+</tr></thead><tbody>
+<tr>
+<td>06:12</td>
+<td>霍姆兹触雷</td>
+<td>地缘冲突</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>新/东/闻×3</td>
+<td>一艘违规油轮在霍尔木兹海峡以东触雷起火，导航系统关闭，位于禁航区</td>
+</tr>
+<tr>
+<td>05:19</td>
+<td>火神火箭失败</td>
+<td>航天/商业</td>
+<td>⭐⭐⭐⭐</td>
+<td>新/闻/东×3</td>
+<td>ULA火神火箭升空约10分钟后故障，40颗亚马逊Leo卫星报废，首次复飞受挫</td>
+</tr>
+<tr>
+<td>03:47</td>
+<td>H股超配上调</td>
+<td>宏观/策略</td>
+<td>⭐⭐⭐⭐</td>
+<td>新/富×2</td>
+<td>高盛将H股评级上调至超配，MSCI中国明年涨23%，沪深300涨10%</td>
+</tr>
+<tr>
+<td>02:35</td>
+<td>胡塞袭击利雅得</td>
+<td>地缘冲突</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>新/同/东×3</td>
+<td>胡塞用两枚弹道导弹袭击利雅得哈立德国王机场和金融区，沙特未证实</td>
+</tr>
+<tr>
+<td>01:34</td>
+<td>ONE恢复红海航线</td>
+<td>航运/物流</td>
+<td>⭐⭐⭐⭐</td>
+<td>新/富×2</td>
+<td>日本ONE时隔约三年首派集装箱船通过曼德海峡，供应链扰动边际缓解</td>
+</tr>
+</tbody></table></div>
+<h3 id="s6">A 级（2源或高相关性）</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>关键词</th>
+<th>类别</th>
+<th>评分</th>
+<th>来源</th>
+<th>摘要</th>
+</tr></thead><tbody>
+<tr>
+<td>23:34/23:11</td>
+<td>黄仁勋/英伟达</td>
+<td>科技/公司治理</td>
+<td>⭐⭐⭐⭐</td>
+<td>新/富/东/见×4</td>
+<td>贝森特效要求外部换帅+限10天合规回应；众议院闭门听证在即；黄已与盟友讨论重返CEO</td>
+</tr>
+<tr>
+<td>02:42</td>
+<td>施密德鹰派发言</td>
+<td>央行/货币</td>
+<td>⭐⭐⭐⭐</td>
+<td>新/富×2</td>
+<td>"通胀3%仍过热"、"能源/AI/医疗推升通胀"、"劳动力市场平衡未助推通胀"</td>
+</tr>
+<tr>
+<td>00:06</td>
+<td>美通胀扩散</td>
+<td>宏观</td>
+<td>⭐⭐⭐</td>
+<td>东/富×2</td>
+<td>10月非农火爆+物价上涨，十年期国债收益率反弹超5%，短端2年期+38.8bp创2022年6月以来最大四日涨幅</td>
+</tr>
+<tr>
+<td>21:57/20:29</td>
+<td>医保目录落地</td>
+<td>国内政策</td>
+<td>⭐⭐⭐</td>
+<td>东/见×2</td>
+<td>新版医保新增107种（51个1类新药），复星多款入选，恒瑞12款7入保</td>
+</tr>
+<tr>
+<td>00:44</td>
+<td>REITs万亿市场</td>
+<td>国内金融</td>
+<td>⭐⭐⭐</td>
+<td>东</td>
+<td>公募REITs总市值逾2400亿元，空间远未见顶，新课题引入长期资金</td>
+</tr>
+</tbody></table></div>
+<h3 id="s7">B 级</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>关键词</th>
+<th>类别</th>
+<th>评分</th>
+<th>摘要</th>
+</tr></thead><tbody>
+<tr>
+<td>06:22</td>
+<td>SpaceX卫星芯片</td>
+<td>半导体</td>
+<td>⭐⭐</td>
+<td>三星在美扩建奥斯汀厂为SpaceX生产STM32V8 MCU（18nm FD-SOI工艺），投资19亿美元</td>
+</tr>
+<tr>
+<td>03:45</td>
+<td>泽连斯基战损通报</td>
+<td>地缘</td>
+<td>⭐⭐</td>
+<td>俄军10月伤亡超5万；乌已使俄超55%炼油产能瘫痪</td>
+</tr>
+<tr>
+<td>00:25</td>
+<td>Diamondback收购案</td>
+<td>能源/M&amp;A</td>
+<td>⭐⭐</td>
+<td>美能源勘探商Diamondback拟50亿美元收购Double Eagle二叠纪资产</td>
+</tr>
+<tr>
+<td>06:10</td>
+<td>AMD/SK海力士暗盘</td>
+<td>半导体</td>
+<td>⭐⭐</td>
+<td>AMD暗盘+1%，报526.295美元；SK海力士暗盘+1%，报130.935美元</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s8">四、主题归纳</h2>
+<h3 id="s9">🔴 主题一：霍尔木兹海峡-沙特东部能源走廊安全危机升级</h3>
+<p><strong>核心链条</strong>：伊朗议会国家安全委员会审议霍尔木兹通行方案 → 胡塞武装声称袭击沙特输油管道泵站 &amp; 利雅得机场 → 原油暗盘突破87美元，金价突破3850美元</p>
+<p><strong>交易影响</strong>：油气现货升水扩大；天然气定价（尤其欧洲冬季）受伊朗威胁传导；黄金短期维持强势；航运保险费率上行</p>
+<p><strong>观察项</strong>：沙特联军24小时内75次空袭也门回应，报复升级可能性高；若输油管道实质受损将触发油价跳涨</p>
+<h3 id="s10">🔴 主题二：英伟达治理危机向制度层面蔓延</h3>
+<p><strong>核心链条</strong>：黄仁勋风波持续发酵 → 贝森特效公开施压要求外部换帅+10天合规回应期限 → 众议院听证在即 → 硅谷盟友组建"战情室"推动复职</p>
+<p><strong>交易影响</strong>：NVDA股价短期剧烈波动（暗盘一度跌2%后收复）；国产算力替代链（寒武纪、曦选创智等）估值弹性增加；供应链合规审查扩大至AI硬件出口管制</p>
+<p><strong>观察项</strong>：众议院听证若推迟至下周，则本周NVDA可能继续震荡；贝森特效表态是否转化为正式行政指令</p>
+<h3 id="s11">🟡 主题三：美联储内部鹰鸽分歧加剧</h3>
+<p><strong>核心链条</strong>：施密德强调"通胀3%仍过高、仍有工作要做" vs 贝森特警告"勿过度紧缩、下月通胀将回落"</p>
+<p><strong>交易影响</strong>：12月加息25bp概率95%（CME），但幅度存在博弈；美债收益率曲线短期陡峭化倾向；美元指数DXY微跌0.04%报103.37</p>
+<p><strong>观察项</strong>：沃勒此前暗示加息50bp的言论引发抛售潮，施密德表态是否延续此路径；美联储10月会议纪要周四公布前波动或加大</p>
+<h3 id="s12">🟡 主题四：海外资金持续流入中国资产</h3>
+<p><strong>核心链条</strong>：高盛将H股评级上调至超配（MSCI中国明年+23%）→ 巴克莱/花旗/富达Q3 13F明显加仓中概 → 迈克尔·巴里持续买入京东看涨+比亚迪</p>
+<p><strong>交易影响</strong>：A/H股权重配置机会窗口仍在；关注算力、人形机器人、创新药、CXO四条主线</p>
+<p><strong>观察项</strong>：北向资金实际流向是否与机构声明一致；港股流动性改善是否持续</p>
+<hr>
+<h2 id="s13">五、跨市场传导</h2>
+<div class="tw"><table><thead><tr>
+<th>市场</th>
+<th>影响方向</th>
+<th>传导路径</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>美股</strong></td>
+<td>偏空</td>
+<td>胡塞袭击沙特石油设施 → 原油价格上行 → 通胀担忧升温 → 美联储鹰派压力↑</td>
+</tr>
+<tr>
+<td><strong>美股</strong></td>
+<td>中性偏多</td>
+<td>ONE恢复红海航线 → 供应链扰动边际缓解 → 航运成本下行预期</td>
+</tr>
+<tr>
+<td><strong>A股/港股</strong></td>
+<td>偏多</td>
+<td>高盛H股超配 + 海外资金加仓信号 → 中期配置窗口</td>
+</tr>
+<tr>
+<td><strong>A股</strong></td>
+<td>结构性利好</td>
+<td>医保目录落地（创新药）；国产算力替代链估值重估；公募REITs万亿市场想象空间</td>
+</tr>
+<tr>
+<td><strong>大宗商品</strong></td>
+<td>偏多</td>
+<td>原油（87美元暗盘）、黄金（3850美元）、天然气（伊朗冬季威胁）均上行</td>
+</tr>
+<tr>
+<td><strong>汇率</strong></td>
+<td>美元偏弱</td>
+<td>DXY微跌；施密德鹰派 vs 贝森特鸽派对冲后短期偏向非方向性</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s14">六、重点交易线索</h2>
+<h3 id="s15">🔥 短线观察（T+1 ~ T+3）</h3>
+<ol>
+<li><strong>原油/成品油链</strong>：关注布伦特原油开盘表现（当前暗盘WTI突破87美元），东方通信、中曼石油、蓝焰控股
+</li>
+<li><strong>黄金链</strong>：金价突破3850美元新高，山东黄金、赤峰黄金、银泰黄金
+</li>
+<li><strong>NVDA产业链</strong>：博通集成、澜起科技、芯原股份（注意波动风险）
+</li>
+</ol>
+<h3 id="s16">📈 中线布局（周度视角）</h3>
+<ol>
+<li><strong>H股/港股科技</strong>：跟随高盛评级上调逻辑，关注腾讯、阿里巴巴、美团等中概互联网
+</li>
+<li><strong>创新药</strong>：新版医保目录落地，恒瑞医药、复星医药、君实生物
+</li>
+<li><strong>国产算力</strong>：寒武纪、曦选创智（优必选合资），关注国产GPU/AI芯片替代逻辑
+</li>
+</ol>
+<hr>
+<p><em>注：本报告由 finance-flash-12h 技能生成，数据来自新浪/同花顺/富途/华尔街见闻/东方财富五源采集，经 condense2 去重合并、run_enhance 路线B增强后成文。统计行照抄脚本真实输出，无任何估算。</em></p>
+</div>
+</body>
+</html>
