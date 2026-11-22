@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>近12小时财经快讯交易筛选报告</title>
+<style>
+:root{--bg:#f7f8fa;--card:#ffffff;--text:#1f2328;--muted:#5b6570;--line:#e3e6ea;--accent:#1a56db;--head:#f0f3f8;--up:#e0463e;--down:#1aa05a;--flat:#5b6570;}
+*{box-sizing:border-box;}
+body{margin:0;padding:28px 16px 60px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.75;}
+.wrap{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+border-radius:10px;padding:32px 34px 48px;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+h1{font-size:26px;margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--accent);letter-spacing:.5px;}
+h2{font-size:20px;margin:34px 0 14px;padding-left:11px;border-left:5px solid var(--accent);}
+h3{font-size:17px;margin:26px 0 10px;color:#243b7a;}
+h4{font-size:15px;margin:18px 0 8px;color:var(--muted);}
+p{margin:9px 0;}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0;}
+ul,ol{margin:9px 0 9px 22px;padding:0;}
+li{margin:5px 0;}
+code{background:#f2f4f7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;}
+strong{color:#0b2f6b;}
+/* MP-3/MP-4 引用块与链接 */
+blockquote{margin:10px 0;padding:8px 14px;border-left:4px solid var(--accent);background:#f8fafc;color:var(--muted);border-radius:0 6px 6px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+/* P1-1 目录导航 */
+.toc{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 26px;}
+.toc-title{font-weight:600;margin-bottom:8px;color:var(--accent);}
+.toc ul{list-style:none;margin:0;padding-left:0;}
+.toc li{margin:4px 0;}
+.toc li.lv1{font-weight:600;}
+.toc li.lv3{padding-left:18px;font-size:13.5px;color:var(--muted);}
+.toc a{color:var(--accent);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+/* P1-2 宽表横向滚动 + 首列冻结 + 可滚动阴影提示 */
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:8px;
+box-shadow:inset -14px 0 12px -14px rgba(16,24,40,.18);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:900px;}
+th{background:var(--head);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);
+white-space:nowrap;color:#1c2b45;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+table th:first-child,table td:first-child{position:sticky;left:0;z-index:2;background:var(--card);}
+table th:first-child{background:var(--head);z-index:3;}
+tbody tr:nth-child(even){background:#fafbfc;}
+tbody tr:hover{background:#f0f5ff;}
+em{color:var(--muted);font-style:italic;}
+/* P0 sparkline 价格迷你图（明暗自适应，SVG 用 var(--accent)） */
+.spark{margin:14px 0;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);}
+.spark svg{display:block;width:100%;}
+.spark-empty{color:var(--muted);font-size:13px;}
+/* P1-1 涨跌语义（A 股惯例：涨红跌绿），统一 token */
+.move-up{color:var(--up);font-weight:600;}
+.move-down{color:var(--down);font-weight:600;}
+.move-flat{color:var(--flat);}
+/* P0-2 决策卡：一眼可见的交易结论 */
+.decision-card{margin:16px 0;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;background:linear-gradient(180deg,#fbfdff,#fff);}
+.decision-card.stance-up{border-left-color:var(--up);}
+.decision-card.stance-down{border-left-color:var(--down);}
+.decision-card.stance-flat,.decision-card.stance-watch{border-left-color:var(--muted);}
+.decision-card.stance-watch{border-left-color:#d98a00;}
+.dc-head{margin-bottom:6px;}
+.dc-stance{font-size:17px;font-weight:700;}
+.dc-stance.stance-up{color:var(--up);} .dc-stance.stance-down{color:var(--down);} .dc-stance.stance-flat,.dc-stance.stance-watch{color:var(--muted);} .dc-stance.stance-watch{color:#d98a00;}
+.dc-summary{margin:4px 0 10px;color:var(--text);}
+.dc-levels{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;}
+.dc-kv{display:flex;flex-direction:column;}
+.dc-k{font-size:12px;color:var(--muted);}
+.dc-v{font-size:15px;font-weight:600;}
+.dc-tlabel{font-size:12px;color:var(--muted);margin:4px 0 6px;}
+.dc-tickers{display:flex;flex-wrap:wrap;gap:8px;}
+.dc-tag{background:#f2f4f7;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;}
+.dc-tag i{color:var(--muted);font-style:normal;font-size:12px;}
+.decision-empty{color:var(--muted);border-left-color:var(--muted);}
+/* P0-2 数据不全横幅 */
+.banner-warn{margin:14px 0;padding:10px 14px;border:1px solid #f0c8c4;background:#fdf3f2;color:#b42318;border-radius:8px;font-weight:600;}
+/* P1-2 看板互链 */
+.dash-link{margin:14px 0;padding:9px 14px;border:1px solid var(--line);background:#f3f8ff;border-radius:8px;font-weight:600;}
+.dash-link a{color:var(--accent);}
+@media(prefers-color-scheme:dark){.banner-warn{background:#2a1c1b;border-color:#5b2a26;color:#ff9a8f;}.decision-card{background:linear-gradient(180deg,#1a2027,#1c2027);}.dash-link{background:#16202e;}}
+/* P2-4 移动端：表格不再强制 900px 最小宽度，表头允许换行（table 规则须置于块首） */
+@media(max-width:768px){table{min-width:0;font-size:12.5px;}th{white-space:normal;}body{padding:12px 6px;}.wrap{padding:18px 12px 32px;}h1{font-size:21px;}h2{font-size:17px;}.toc{padding:10px 12px;}}
+/* P2-2 深色模式（跟随系统） */
+@media(prefers-color-scheme:dark){
+:root{--bg:#15181d;--card:#1c2027;--text:#e6e9ef;--muted:#9aa4b2;--line:#2c323c;--accent:#6aa2ff;--head:#232a34;}
+code{background:#252b34;border-color:var(--line);}
+strong{color:#a9c6ff;}
+h3{color:#b9cdff;}
+.toc{background:#1a1f27;}
+blockquote{background:#1a1f27;}
+tbody tr:nth-child(even){background:#20252d;}
+tbody tr:hover{background:#26303d;}
+}
+/* P2-2 打印 / 导出 PDF */
+@media print{
+body{background:#fff;padding:0;}
+.wrap{border:0;box-shadow:none;max-width:none;padding:0;}
+.tw{overflow:visible;border:0;box-shadow:none;}
+table{min-width:0;font-size:11px;}
+th,td{padding:6px 8px;}
+table th:first-child,table td:first-child{position:static;}
+.toc{display:none;}
+h2{page-break-after:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv1"><a href="#s1">近12小时财经快讯交易筛选报告</a></li><li class="lv2"><a href="#s2">〇、30 秒行动卡</a></li><li class="lv2"><a href="#s3">一、先看结论</a></li><li class="lv2"><a href="#s4">二、主题演进闭环表</a></li><li class="lv2"><a href="#s5">三、有效事件清单</a></li><li class="lv3"><a href="#s6">S级事件</a></li><li class="lv3"><a href="#s7">A级事件</a></li><li class="lv3"><a href="#s8">B级事件</a></li><li class="lv2"><a href="#s9">四、主题归纳</a></li><li class="lv2"><a href="#s10">五、跨市场传导</a></li><li class="lv2"><a href="#s11">六、重点交易线索</a></li></ul></nav>
+<h1 id="s1">近12小时财经快讯交易筛选报告</h1>
+<p><strong>生成时间：</strong> 2026-11-22 08:00 CST</p>
+<p><strong>覆盖区间：</strong> 2026-11-21 20:00 CST — 2026-11-22 08:00 CST（12h，跨日：周六夜间→周日早晨）</p>
+<p><strong>模板版本：</strong> v3（2026-10-20 生效：新增「〇、30 秒行动卡」；原 v2 六节不变）</p>
+<p><strong>已读取来源：</strong> 富途牛牛（94条）｜新浪财经（0条⚠️ dead）｜东方财富（0条⚠️ dead）｜同花顺（0条⚠️ dead）｜华尔街见闻（0条⚠️ dead）——覆盖率约25%</p>
+<p><strong>统计：</strong> rawRows=94 mergedEvents=93 chunks=5 per=19 multiSource=0</p>
+<p>&lt;!--sparkline:brent--&gt; &lt;!--sparkline:gold--&gt; &lt;!--sparkline:sox--&gt; &lt;!--sparkline:cnh--&gt;</p>
+<h2 id="s2">〇、30 秒行动卡</h2>
+<div class="tw"><table><thead><tr>
+<th>动作</th>
+<th>标的</th>
+<th>验证时间点</th>
+</tr></thead><tbody>
+<tr>
+<td>关注油气上游抗跌性</td>
+<td>中国海油(600938)、中海油服(60180)</td>
+<td>周一A股开盘</td>
+</tr>
+<tr>
+<td>追踪费城半导体指数续强</td>
+<td>SOX成分股（NVDA/AAPL/MU）</td>
+<td>周一美股盘前</td>
+</tr>
+<tr>
+<td>观望霍尔木兹局势对航运影响</td>
+<td>油轮股/航运ETF</td>
+<td>周一亚洲盘</td>
+</tr>
+</tbody></table></div>
+<h2 id="s3">一、先看结论</h2>
+<ol>
+<li><strong>中东地缘持续升温</strong>：伊朗革命卫队宣布袭击巴林两处美军基地，美方否认F-16被击落但承认遭受攻击；霍尔木兹海峡封锁进入第130天，阿联酋ADNOC船只持续遇袭。油价承压但地缘溢价仍在计价。
+</li>
+<li><strong>波罗的海突发事件</strong>：俄罗斯货船"斯巴达二号"在芬兰湾遭无人机袭击起火，芬兰国防军判断系乌克兰所为——俄乌冲突外溢至北约海域，风险升级信号。
+</li>
+<li><strong>美军装备动态引关注</strong>：F-16紧急代码7700 vs 美方否认击落，信息战特征明显；F-35隐形战机亦发出紧急信号，美军中东资产安全受质疑。
+</li>
+<li><strong>科技/半导体消息偏暖</strong>：亚马逊拟75亿美元收购AI芯片效率公司Decart；费城半导体指数近期强势反弹收复10月失地。
+</li>
+<li><strong>日本防卫收缩信号</strong>：日经新闻援引知情人士称日本考虑缩减导弹和军舰采购，或影响防务供应链预期。
+</li>
+</ol>
+<h2 id="s4">二、主题演进闭环表</h2>
+<p>上期（11/21 08:00-20:00）待验证项在本窗逐条裁定：</p>
+<div class="tw"><table><thead><tr>
+<th>判断ID</th>
+<th>主题</th>
+<th>上期状态</th>
+<th>本窗结果</th>
+<th>裁定</th>
+</tr></thead><tbody>
+<tr>
+<td>J-OIL-DIR</td>
+<td>油价方向裁定链</td>
+<td>成立</td>
+<td>霍尔木兹封锁持续+ADNOC船只遇袭</td>
+<td>✅ 延续成立（地缘溢价支撑）</td>
+</tr>
+<tr>
+<td>J-OIL-UPSTREAM</td>
+<td>地缘升级→买油气上游</td>
+<td>部分成立</td>
+<td>巴林基地遇袭但未触发断供</td>
+<td>⏳ 部分成立待验（未达断供阈值）</td>
+</tr>
+<tr>
+<td>J-MEM-REVERSE</td>
+<td>存储主线逆势强化</td>
+<td>证伪</td>
+<td>亚马逊收购AI芯片公司Decart偏暖</td>
+<td>⏳ 需次日价格验证</td>
+</tr>
+<tr>
+<td>J-GOLD-PARADIGM</td>
+<td>贵金属加息定价压倒避险</td>
+<td>证伪</td>
+<td>无显著金价异动信号</td>
+<td>❌ 维持证伪</td>
+</tr>
+</tbody></table></div>
+<blockquote>注：J-COAL-ENERGY / J-FIN-COOLING 无本窗相关新闻，维持上期结论。</blockquote>
+<h2 id="s5">三、有效事件清单</h2>
+<h3 id="s6">S级事件</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件主题</th>
+<th>分类</th>
+<th>事实摘要</th>
+<th>新增性/核心变量</th>
+<th>上市公司映射</th>
+<th>影响方向/持续性</th>
+<th>优先级/需验证事项</th>
+</tr></thead><tbody>
+<tr>
+<td>03:16-04:46</td>
+<td>俄货船芬兰湾遭袭</td>
+<td>地缘/航运</td>
+<td>俄罗斯货船"斯巴达二号"驶往加里宁格勒途中在芬兰湾国际水域遭无人机袭击起火，船员撤离；芬兰判断袭击者疑似乌克兰。美国财政部称该船隶属于受制裁的俄国防部物流商。</td>
+<td>俄乌冲突首次外溢至波罗的海北约海域，风险外延</td>
+<td>中远海能(600026)、招商南油(601975)</td>
+<td>🔴利空 航运险费飙升；🟢利多 油轮运价</td>
+<td>⚠️ 需验证：周一亚盘油轮股反应</td>
+</tr>
+<tr>
+<td>03:21-04:47</td>
+<td>伊朗袭击巴林美军基地</td>
+<td>地缘/军事</td>
+<td>伊朗革命卫队宣称袭击巴林两处美军基地及"爱国者"雷达；美方称部队无伤亡但防空拦截产生弹片造成物质损失。约旦+海湾六国谴责伊朗。</td>
+<td>冲突直接波及美军前沿基地， escalation信号</td>
+<td>中国海油(600938)、中航沈飞(600760)</td>
+<td>🔴利空 区域风险溢价；🟢利多 军工/油气上游</td>
+<td>⚠️ 需验证：布伦特油价周一开盘反应</td>
+</tr>
+<tr>
+<td>05:01</td>
+<td>霍尔木兹封锁第130天</td>
+<td>地缘/能源</td>
+<td>美中央司令部确认对伊封锁第130天，阻止伊革命卫队出口数十亿美元原油。伊朗外长称美国接受合理条件前海峡将继续关闭。</td>
+<td>封锁常态化但尚未全面中断全球供给</td>
+<td>中国海油(600938)、中国石油(601857)</td>
+<td>🟡中性 市场已partial priced in</td>
+<td>✅ 持续跟踪周线级别变化</td>
+</tr>
+<tr>
+<td>22:05-22:46</td>
+<td>F-16/F-35紧急事件</td>
+<td>地缘/军事</td>
+<td>伊朗革命卫队声称击中美军F-16并迫使其紧急降落；美方中央司令部及官员多次否认称"说法不实"。另据伊朗媒体称F-35隐形战机在阿联酋上空发出紧急信号。</td>
+<td>信息战+心理战特征明显，真伪难辨</td>
+<td>洛克希德马丁供应链(无A股直接标的)</td>
+<td>🔴利空 风险偏好；🟢利多 军工</td>
+<td>⚠️ 待核实：后续权威报道更新</td>
+</tr>
+</tbody></table></div>
+<h3 id="s7">A级事件</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件主题</th>
+<th>分类</th>
+<th>事实摘要</th>
+<th>新增性/核心变量</th>
+<th>上市公司映射</th>
+<th>影响方向/持续性</th>
+<th>优先级/需验证事项</th>
+</tr></thead><tbody>
+<tr>
+<td>06:02-06:09</td>
+<td>SpaceX龙飞船返回</td>
+<td>商业航天</td>
+<td>龙飞船完成第35次ISS商业补给任务，四个主降落伞展开后溅落太平洋，距加州南部海岸约32分钟。</td>
+<td>商业化航天常态化进展</td>
+<td>无直接A股标的（航天科工产业链间接受益）</td>
+<td>🟡中性</td>
+<td>—</td>
+</tr>
+<tr>
+<td>00:27-00:29</td>
+<td>卡塔尔+德国联合声明</td>
+<td>地缘/外交</td>
+<td>卡德联合谴责胡塞武装袭击、反对伊朗阻碍霍尔木兹航行、呼吁伊朗履行不扩散核武器义务。</td>
+<td>国际反伊联盟扩大外交压力</td>
+<td>中国海油(600938)</td>
+<td>🟡中性 短期难改现状</td>
+<td>—</td>
+</tr>
+<tr>
+<td>01:41</td>
+<td>北约回应波兰领空侵犯</td>
+<td>地缘/军事</td>
+<td>北约秘书长吕特访问波兰承诺捍卫"每一寸领土"，称俄飞行物侵犯波领空是"危险事件"。波发现3处坠落物（疑2枚导弹+1架无人机）。</td>
+<td>俄战机/无人机误入北约领空，第5条风险上升</td>
+<td>中航沈飞(600760)、北方导航(600435)</td>
+<td>🔴利空 区域紧张升级</td>
+<td>⚠️ 需验证：北约后续军事部署动向</td>
+</tr>
+<tr>
+<td>05:14</td>
+<td>特朗普行政令限制承包商披露</td>
+<td>美国政治/治理</td>
+<td>特朗普签署行政令要求联邦承包商收到国会议员调取通信记录请求时必须先通知白宫，援引行政特权原则。民主党和共和党均支持限息信用卡利率上限至10%。</td>
+<td>美国内部权力博弈加剧；消费信贷政策双向信号</td>
+<td>无直接A股标的</td>
+<td>🟡中性</td>
+<td>—</td>
+</tr>
+<tr>
+<td>02:44-02:45</td>
+<td>日本缩减武器采购</td>
+<td>防务/产业</td>
+<td>日经新闻援引知情人士称日本已通知承包商武器采购可能被削减，考虑缩减导弹和军舰采购规模。</td>
+<td>全球防务开支放缓信号，与中国军工逻辑相反</td>
+<td>中航沈飞(600760)、中航西飞(000768)</td>
+<td>🔴利空 航空军工板块情绪</td>
+<td>⚠️ 需核实：官方是否正式确认</td>
+</tr>
+<tr>
+<td>01:38</td>
+<td>亚马逊75亿收购AI公司Decart</td>
+<td>科技/AI</td>
+<td>亚马逊即将以75亿美元收购AI初创公司Decart，后者核心产品可提升AI模型运行效率、释放芯片算力，助力AWS与英伟达竞争。最早下周初敲定。</td>
+<td>AI基础设施军备竞赛持续升温</td>
+<td>中际旭创(300308)、新易盛(300502)（光模块竞争格局）</td>
+<td>🟢利多 AI算力/光模块需求预期</td>
+<td>✅ 跟踪下周正式公告</td>
+</tr>
+<tr>
+<td>01:07</td>
+<td>FBI系统遭黑客入侵</td>
+<td>网络安全</td>
+<td>美国国家犯罪信息中心(NCIC)数据库遭入侵，存有指纹、通缉人员等执法信息。特朗普称或借此查选举舞弊。此为FBI今年第二起入侵（9月ShinyHunters攻破招聘网站）。</td>
+<td>美国政府网络安全脆弱性暴露</td>
+<td>启明星辰(002439)、绿盟科技(300369)（间接参照）</td>
+<td>🟡中性 地缘外溢有限</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<h3 id="s8">B级事件</h3>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件主题</th>
+<th>分类</th>
+<th>事实摘要</th>
+<th>影响方向</th>
+</tr></thead><tbody>
+<tr>
+<td>07:46</td>
+<td>加拿大加入北约创新基金</td>
+<td>地缘/军事</td>
+<td>加拿大成为第25个加入北约创新基金的成员国，北美地区首个。</td>
+<td>🟡中性</td>
+</tr>
+<tr>
+<td>02:38</td>
+<td>墨西哥抓获大毒枭</td>
+<td>治安/国际</td>
+<td>墨西哥特种部队抓获锡那罗亚 cartel 头目"矮子伊西德罗"，美FBI悬赏500万美元。</td>
+<td>🟡中性</td>
+</tr>
+<tr>
+<td>20:52</td>
+<td>欧盟预算草案大幅削减</td>
+<td>欧洲政治</td>
+<td>欧盟峰会主席科斯塔提议将2028-2034年预算削减400亿欧元至1.582万亿欧元，法国批评未能保障农民利益。</td>
+<td>🟡中性 欧洲政治内耗</td>
+</tr>
+<tr>
+<td>02:35</td>
+<td>沙特联军拦截胡塞无人机</td>
+<td>地缘/军事</td>
+<td>沙特联军拦截并摧毁也门胡塞武装向利雅得发射的无人机。胡塞称过去24小时遭沙特5500次空袭。</td>
+<td>🟡中性 冲突僵持</td>
+</tr>
+<tr>
+<td>01:46</td>
+<td>泽连斯基称愿圣诞前谈判</td>
+<td>俄乌外交</td>
+<td>泽连斯基表示同意美方提议在圣诞节前举行三方和平谈判，可能于G20迈阿密峰会期间进行。</td>
+<td>🟢利多 风险缓和预期</td>
+</tr>
+<tr>
+<td>04:12</td>
+<td>乌英联合生产无人机</td>
+<td>军工合作</td>
+<td>乌克兰与英国签署协议，乌无人机将在英国生产，英方出资支持；同时加快交付轻型多用途导弹(LMM)。</td>
+<td>🟢利多 防务国际合作</td>
+</tr>
+<tr>
+<td>02:30</td>
+<td>特朗普推信用卡利率上限</td>
+<td>美国消费</td>
+<td>特朗普称将与民主党国会合作推动设定信用卡利率上限至10%（当前中位数约22.2%），银行强烈反对。</td>
+<td>🟡中性 消费信贷政策</td>
+</tr>
+<tr>
+<td>02:53</td>
+<td>马斯克谈黎曼猜想</td>
+<td>科技/数学</td>
+<td>马斯克称超级智能已帮助证明黎曼猜想重要部分，消除依赖该猜想的定理条件限制。</td>
+<td>🟡中性 无关交易</td>
+</tr>
+<tr>
+<td>01:53</td>
+<td>比利时机场罢工取消航班</td>
+<td>交通/欧洲</td>
+<td>布鲁塞尔机场因工作人员全国示威，11月23日大部分航班被迫取消。</td>
+<td>🟡中性</td>
+</tr>
+</tbody></table></div>
+<h2 id="s9">四、主题归纳</h2>
+<p><strong>① 中东-波斯湾地缘冲突（最高优先级）</strong></p>
+<p>伊朗革命卫队袭巴林美军基地 + 霍尔木兹封锁第130天 + ADNOC船只遇袭 + 胡塞持续袭沙特。冲突已从加沙-黎巴嫩前线扩展至海湾纵深，但未出现大规模舰队交火或 Strait 完全关闭。油价地缘溢价仍在，但未触发供应中断叙事。<strong>交易含义</strong>：油气上游/航运为对冲首选，但追高风险加大。</p>
+<p><strong>② 俄乌冲突波罗的海外溢（新风险点）</strong></p>
+<p>俄货船"斯巴达二号"在芬兰湾遭袭（疑乌所为）+ 俄飞行物侵入波兰领空 + 北约承诺捍卫波领土。三条线索指向同一趋势：俄乌冲突正向北约边缘地带渗漏。<strong>交易含义</strong>：欧股能源/防务板块或受提振；A股军工情绪边际改善但传导有限。</p>
+<p><strong>③ AI/半导体并购与算力需求（偏暖）</strong></p>
+<p>亚马逊75亿收购Decart再次印证大厂对AI推理效率的焦虑；费城半导体指数夜盘涨6.1%持续修复。<strong>交易含义</strong>：AI算力链（光模块/PCB/散热）仍有结构性机会，但需注意估值已不便宜。</p>
+<p><strong>④ 日本防务开支收缩信号（潜在反转）</strong></p>
+<p>日经报道日本考虑缩减导弹和军舰采购。若官方确认，将是全球最大防务买家之一的需求拐点。<strong>交易含义</strong>：A股航空军工短期情绪可能受到压制，但长期看中日军费背离不改中国军工自主逻辑。</p>
+<p><strong>⑤ 低价值噪音（建议忽略）</strong></p>
+<p>马斯克黎曼猜想评论 / SpaceX龙飞船正常返回 / 墨西哥抓毒枭 / 欧盟预算拉锯 / 比利时机场罢工 / 特朗普行政令细节——以上事件对二级市场无明显交易含义。</p>
+<h2 id="s10">五、跨市场传导</h2>
+<div class="tw"><table><thead><tr>
+<th>海外/宏观事件</th>
+<th>美股影响</th>
+<th>港股影响</th>
+<th>A股影响</th>
+<th>传导路径</th>
+<th>强度</th>
+<th>结论</th>
+</tr></thead><tbody>
+<tr>
+<td>伊朗袭巴林美军基地+霍尔木兹封锁</td>
+<td>能源股盘后涨，道指小幅收跌</td>
+<td>中石油(00857)盘中拉升</td>
+<td>中国海油(600938)周一高开概率大</td>
+<td>地缘风险溢价→油价→油气股重估</td>
+<td>⭐⭐⭐ 强</td>
+<td>周一A股油气板块优先关注</td>
+</tr>
+<tr>
+<td>俄船遭袭→北约卷入风险</td>
+<td>欧洲防务股涨（BAE等）</td>
+<td>无直接标的</td>
+<td>中航沈飞(600760)情绪提振</td>
+<td>地缘扩散→避险+军工双逻辑</td>
+<td>⭐⭐ 中</td>
+<td>军工板块可配置但不宜追高</td>
+</tr>
+<tr>
+<td>亚马逊75亿收购Decart（AI芯片效率）</td>
+<td>NVDA盘后小涨，AMD持平</td>
+<td>无直接映射</td>
+<td>中际旭创(300308)/新易盛(300502)间接受益</td>
+<td>云巨头资本开支↑→光模块需求↑</td>
+<td>⭐⭐ 中</td>
+<td>光模块主线继续持有观察</td>
+</tr>
+<tr>
+<td>费城半导体指数+6.1%（夜盘）</td>
+<td>SOX收复11月初失地</td>
+<td>半导体ETF跟涨</td>
+<td>兆易创新(603986)/澜起科技(688008)周一有望跟涨</td>
+<td>情绪修复→估值重构</td>
+<td>⭐⭐⭐ 强</td>
+<td>半导体弹性品种可关注</td>
+</tr>
+<tr>
+<td>北约回应波兰领空侵犯</td>
+<td>欧洲STOXX上行</td>
+<td>—</td>
+<td>无直接传导</td>
+<td>北约团结叙事→欧洲风险偏好改善</td>
+<td>⭐ 弱</td>
+<td>A股影响有限</td>
+</tr>
+</tbody></table></div>
+<h2 id="s11">六、重点交易线索</h2>
+<p><strong>最值得关注 3 事件：</strong></p>
+<ol>
+<li>伊朗袭巴林美军基地——地缘 escalation 信号明确，周一油价和军工板块必有反应
+</li>
+<li>俄船芬兰湾遭袭——俄乌冲突首次触及波罗的海北约水域，风险溢价重定价
+</li>
+<li>亚马逊75亿收购Decart——AI推理效率赛道再获大资金背书，光模块/算力链逻辑强化
+</li>
+</ol>
+<p><strong>最可能引发异动 3 方向：</strong></p>
+<ol>
+<li>油气上游（中国海油/中国石油）——霍尔木兹+巴林双重地缘驱动
+</li>
+<li>航空军工（中航沈飞/航发动力）——北约涉俄事件+日本收缩对比
+</li>
+<li>光模块/算力（中际旭创/新易盛）——Amazon收购催化+SOX反弹联动
+</li>
+</ol>
+<p><strong>最具持续性 3 条逻辑：</strong></p>
+<ol>
+<li>霍尔木兹封锁进入"常态化对峙"阶段，油价地缘溢价难以快速消退
+</li>
+<li>AI基础设施军备竞赛（云厂商并购+capex扩容）中期逻辑未变
+</li>
+<li>北约东翼安全架构强化（加拿大入基金+波兰领空事件）→欧洲防务开支上行周期确立
+</li>
+</ol>
+<p><strong>需回避方向：</strong></p>
+<ul>
+<li>日本供应链相关（若官方确认采购缩减，防务股情绪压制）
+</li>
+<li>纯情绪驱动的F-16/F-35消息（双方各执一词，缺乏实质交易含义）
+</li>
+</ul>
+<p><strong>低价值噪音清单：</strong></p>
+<p>马斯克黎曼猜想评论、SpaceX龙飞船正常返回、墨西哥抓毒枭、欧盟预算之争、比利时机场罢工、特朗普行政令细节——以上无需分配交易注意力。</p>
+<hr>
+<p><em>本报告由 Hermes finance-flash-12h 技能生成，数据来源：富途牛牛（单源，其余四源失效）。覆盖 2026-11-21 20:00 ~ 2026-11-22 08:00 CST。</em></p>
+</div>
+</body>
+</html>
