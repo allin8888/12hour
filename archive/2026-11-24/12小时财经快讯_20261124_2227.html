@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>近12小时财经快讯交易筛选报告</title>
+<style>
+:root{--bg:#f7f8fa;--card:#ffffff;--text:#1f2328;--muted:#5b6570;--line:#e3e6ea;--accent:#1a56db;--head:#f0f3f8;--up:#e0463e;--down:#1aa05a;--flat:#5b6570;}
+*{box-sizing:border-box;}
+body{margin:0;padding:28px 16px 60px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.75;}
+.wrap{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+border-radius:10px;padding:32px 34px 48px;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+h1{font-size:26px;margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--accent);letter-spacing:.5px;}
+h2{font-size:20px;margin:34px 0 14px;padding-left:11px;border-left:5px solid var(--accent);}
+h3{font-size:17px;margin:26px 0 10px;color:#243b7a;}
+h4{font-size:15px;margin:18px 0 8px;color:var(--muted);}
+p{margin:9px 0;}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0;}
+ul,ol{margin:9px 0 9px 22px;padding:0;}
+li{margin:5px 0;}
+code{background:#f2f4f7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;}
+strong{color:#0b2f6b;}
+/* MP-3/MP-4 引用块与链接 */
+blockquote{margin:10px 0;padding:8px 14px;border-left:4px solid var(--accent);background:#f8fafc;color:var(--muted);border-radius:0 6px 6px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+/* P1-1 目录导航 */
+.toc{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 26px;}
+.toc-title{font-weight:600;margin-bottom:8px;color:var(--accent);}
+.toc ul{list-style:none;margin:0;padding-left:0;}
+.toc li{margin:4px 0;}
+.toc li.lv1{font-weight:600;}
+.toc li.lv3{padding-left:18px;font-size:13.5px;color:var(--muted);}
+.toc a{color:var(--accent);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+/* P1-2 宽表横向滚动 + 首列冻结 + 可滚动阴影提示 */
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:8px;
+box-shadow:inset -14px 0 12px -14px rgba(16,24,40,.18);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:900px;}
+th{background:var(--head);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);
+white-space:nowrap;color:#1c2b45;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+table th:first-child,table td:first-child{position:sticky;left:0;z-index:2;background:var(--card);}
+table th:first-child{background:var(--head);z-index:3;}
+tbody tr:nth-child(even){background:#fafbfc;}
+tbody tr:hover{background:#f0f5ff;}
+em{color:var(--muted);font-style:italic;}
+/* P0 sparkline 价格迷你图（明暗自适应，SVG 用 var(--accent)） */
+.spark{margin:14px 0;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);}
+.spark svg{display:block;width:100%;}
+.spark-empty{color:var(--muted);font-size:13px;}
+/* P1-1 涨跌语义（A 股惯例：涨红跌绿），统一 token */
+.move-up{color:var(--up);font-weight:600;}
+.move-down{color:var(--down);font-weight:600;}
+.move-flat{color:var(--flat);}
+/* P0-2 决策卡：一眼可见的交易结论 */
+.decision-card{margin:16px 0;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;background:linear-gradient(180deg,#fbfdff,#fff);}
+.decision-card.stance-up{border-left-color:var(--up);}
+.decision-card.stance-down{border-left-color:var(--down);}
+.decision-card.stance-flat,.decision-card.stance-watch{border-left-color:var(--muted);}
+.decision-card.stance-watch{border-left-color:#d98a00;}
+.dc-head{margin-bottom:6px;}
+.dc-stance{font-size:17px;font-weight:700;}
+.dc-stance.stance-up{color:var(--up);} .dc-stance.stance-down{color:var(--down);} .dc-stance.stance-flat,.dc-stance.stance-watch{color:var(--muted);} .dc-stance.stance-watch{color:#d98a00;}
+.dc-summary{margin:4px 0 10px;color:var(--text);}
+.dc-levels{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;}
+.dc-kv{display:flex;flex-direction:column;}
+.dc-k{font-size:12px;color:var(--muted);}
+.dc-v{font-size:15px;font-weight:600;}
+.dc-tlabel{font-size:12px;color:var(--muted);margin:4px 0 6px;}
+.dc-tickers{display:flex;flex-wrap:wrap;gap:8px;}
+.dc-tag{background:#f2f4f7;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;}
+.dc-tag i{color:var(--muted);font-style:normal;font-size:12px;}
+.decision-empty{color:var(--muted);border-left-color:var(--muted);}
+/* P0-2 数据不全横幅 */
+.banner-warn{margin:14px 0;padding:10px 14px;border:1px solid #f0c8c4;background:#fdf3f2;color:#b42318;border-radius:8px;font-weight:600;}
+/* P1-2 看板互链 */
+.dash-link{margin:14px 0;padding:9px 14px;border:1px solid var(--line);background:#f3f8ff;border-radius:8px;font-weight:600;}
+.dash-link a{color:var(--accent);}
+@media(prefers-color-scheme:dark){.banner-warn{background:#2a1c1b;border-color:#5b2a26;color:#ff9a8f;}.decision-card{background:linear-gradient(180deg,#1a2027,#1c2027);}.dash-link{background:#16202e;}}
+/* P2-4 移动端：表格不再强制 900px 最小宽度，表头允许换行（table 规则须置于块首） */
+@media(max-width:768px){table{min-width:0;font-size:12.5px;}th{white-space:normal;}body{padding:12px 6px;}.wrap{padding:18px 12px 32px;}h1{font-size:21px;}h2{font-size:17px;}.toc{padding:10px 12px;}}
+/* P2-2 深色模式（跟随系统） */
+@media(prefers-color-scheme:dark){
+:root{--bg:#15181d;--card:#1c2027;--text:#e6e9ef;--muted:#9aa4b2;--line:#2c323c;--accent:#6aa2ff;--head:#232a34;}
+code{background:#252b34;border-color:var(--line);}
+strong{color:#a9c6ff;}
+h3{color:#b9cdff;}
+.toc{background:#1a1f27;}
+blockquote{background:#1a1f27;}
+tbody tr:nth-child(even){background:#20252d;}
+tbody tr:hover{background:#26303d;}
+}
+/* P2-2 打印 / 导出 PDF */
+@media print{
+body{background:#fff;padding:0;}
+.wrap{border:0;box-shadow:none;max-width:none;padding:0;}
+.tw{overflow:visible;border:0;box-shadow:none;}
+table{min-width:0;font-size:11px;}
+th,td{padding:6px 8px;}
+table th:first-child,table td:first-child{position:static;}
+.toc{display:none;}
+h2{page-break-after:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv1"><a href="#s1">近12小时财经快讯交易筛选报告</a></li><li class="lv2"><a href="#s2">〇、30 秒行动卡（≤3 条：动作 + 标的 + 验证时间点）</a></li><li class="lv2"><a href="#s3">一、先看结论</a></li><li class="lv2"><a href="#s4">二、主题演进闭环表（上期验证项 × 本窗结果）</a></li><li class="lv2"><a href="#s5">三、有效事件清单</a></li><li class="lv2"><a href="#s6">四、主题归纳（按交易优先级排序）</a></li><li class="lv2"><a href="#s7">五、跨市场传导</a></li><li class="lv2"><a href="#s8">六、重点交易线索</a></li><li class="lv2"><a href="#s9">关注池命中（11/24 22:27）</a></li><li class="lv2"><a href="#s10">闭环命中率统计（跨窗聚合）</a></li><li class="lv2"><a href="#s11">回测归因（判断方向 × 后续价格交叉验证）</a></li></ul></nav>
+<h1 id="s1">近12小时财经快讯交易筛选报告</h1>
+<p><strong>生成时间：</strong> 2026-11-24 22:28 CST</p>
+<p><strong>覆盖区间：</strong> 2026-11-24 20:01 CST — 2026-11-24 22:27 CST（2h26m，上期窗口至本次）</p>
+<p><strong>模板版本：</strong> v3（2026-10-20 生效：新增「〇、30 秒行动卡」；原 v2 六节不变）</p>
+<p><strong>已读取来源：</strong> 新浪300条(in-window 243)、同花顺80条(in-window 54)、东方财富200条(in-window 61)、富途100条(in-window 91) ｜华尔街见闻0条空壳；合计采集680条，窗内449条。</p>
+<p><strong>统计：</strong> rawRows 449 mergedEvents 403，multiSource 42；来源健康度同上。</p>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>布伦特原油 走势</title><circle cx="209.0" cy="50.0" r="3.2" fill="var(--accent)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--accent)">86.9 美元/桶</text><text x="8" y="12" font-size="11" fill="var(--muted)">布伦特原油（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:27</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/24 22:27</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>黄金 走势</title><circle cx="209.0" cy="50.0" r="3.2" fill="var(--accent)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--accent)">4100 美元/盎司</text><text x="8" y="12" font-size="11" fill="var(--muted)">黄金（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:27</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/24 22:27</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>美债10Y 走势</title><circle cx="209.0" cy="50.0" r="3.2" fill="var(--accent)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--accent)">4.9 %</text><text x="8" y="12" font-size="11" fill="var(--muted)">美债10Y（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:27</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/24 22:27</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>WTI 原油 走势</title><circle cx="209.0" cy="50.0" r="3.2" fill="var(--accent)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--accent)">81 美元/桶</text><text x="8" y="12" font-size="11" fill="var(--muted)">WTI 原油（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:27</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/24 22:27</text></svg></div>
+<h2 id="s2">〇、30 秒行动卡（≤3 条：动作 + 标的 + 验证时间点）</h2>
+<ol>
+<li><strong>追关税主线：美股指期货低开 / 避险多单</strong> → 标普500期货(SPY/ES)、VIX(75%)、美元DXY → 验证：周二美国贸易代表关税公告后开盘（北京时间约02:00）
+</li>
+<li><strong>做空半导体情绪修复失败</strong> → NVDA/-5.7%、AMD/-6%、MU/-6.9%、INTC/-6.3%、ADI/-10%盘前继续杀跌 → 验证：美股开盘后半小时（北京时间21:30-22:00）
+</li>
+<li><strong>盯中东航运风险再定价</strong> → 布伦特原油(BRKUSD)站上88、霍尔木兹海峡通航风险 → 验证：明日亚盘早盘油价方向确认
+</li>
+</ol>
+<hr>
+<h2 id="s3">一、先看结论</h2>
+<ol>
+<li><strong>特朗普关税升级主导今夜市场</strong>：知情人士透露美国最快本周二宣布对欧盟及14个以上经济体加征关税，税率或叠加在2025年关税基础上，但钢铁铝汽车等部分工业品可能豁免。VIX暴涨22%至32上方，标普500期货跌至当日低点纳指期货跌约2.3%，道指期货跌0.8%。事件尚未落地但情绪已传导。
+</li>
+<li><strong>黄仁勋回归未能止住半导体抛售</strong>：英伟达盘前跌5.7%，AMD跌超6%，英特尔跌6.3%，博通跌5.2%，亚德诺暴跌10%。高盛明确表态——管理层变动不足以扭转行业颓势，空头回补推动的短期反弹不等于基本面复苏，融资成本高企、数据中心建设受限、算力过剩仍是核心矛盾。AI投资回报比CEO风波更重要。
+</li>
+<li><strong>中东地缘风险急剧升温</strong>：沙特利雅得金融中心一塔楼遭袭（联军声明称恐怖袭击）；英国海事机构通报三艘船只在霍尔木兹海峡被不明抛射物击中（23日20:25 GMT）；伊朗总参谋长宣称美军基地严重受损；沙特向盟友紧急求购导弹拦截器。WTI原油盘中反弹至81+，布伦特88+。
+</li>
+<li><strong>大宗商品全面震荡</strong>：布伦特突破88美元（+1.54%），WTI升破81；LME锡暴跌5%至40500美元；白银失守万元/千克；铜价摩根大通看2027年11000美元/吨。
+</li>
+<li><strong>中国宏观与监管面</strong>：上海市委书记陈吉宁接受审查调查；国家数据局启动数字经济十五五行动计划；吉林绿醇燃料目标万辆级。
+</li>
+</ol>
+<hr>
+<h2 id="s4">二、主题演进闭环表（上期验证项 × 本窗结果）</h2>
+<div class="tw"><table><thead><tr>
+<th>上期待验证项</th>
+<th>本窗裁定</th>
+<th>证据摘要</th>
+</tr></thead><tbody>
+<tr>
+<td>中东地缘溢价能否持续推高油价</td>
+<td>✅ 成立强化</td>
+<td>利雅得塔楼遭袭+霍尔木兹三船遇袭+沙特求援拦截器，能源供应风险叙事从"潜在"升级为"正在发生"</td>
+</tr>
+<tr>
+<td>AI融资降温是否扩散至全板块</td>
+<td>✅ 部分证伪→延续待验</td>
+<td>Anthropic盘前暴跌跌破IPO价，HBM需求担忧暂缓解但未消除；台积电/三星关联标的未见直接反应，需观察明日盘面</td>
+</tr>
+<tr>
+<td>美联储按兵不动预期</td>
+<td>🔄 延续待验</td>
+<td>英国央行格林连续发言偏鹰（支持加息），但美国ADP仅2.1万偏弱，红皮书零售+11.3%强劲，矛盾信号明显</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s5">三、有效事件清单</h2>
+<p>仅列 S/A/B 级事件；同主题重复快讯已合并。</p>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件主题</th>
+<th>分类</th>
+<th>事实摘要</th>
+<th>新增性/核心变量</th>
+<th>上市公司映射（含逻辑）</th>
+<th>影响方向/持续性</th>
+<th>优先级/需验证事项</th>
+</tr></thead><tbody>
+<tr>
+<td>22:10~21:33</td>
+<td>特朗普政府拟对欧盟及14国加征关税</td>
+<td>宏观/贸易</td>
+<td>美国贸易代表格里尔预计本周公布针对欧盟产业补贴的关税调查结果，税率或与2025年相当，钢铁铝汽车或豁免</td>
+<td>新增，高冲击</td>
+<td>TSLA(新能源出口敏感)/XOM(COIN等)；美股大盘承压</td>
+<td>🔴下跌/短期</td>
+<td>周二官宣时间+具体税率，若超预期跌幅扩大</td>
+</tr>
+<tr>
+<td>22:12</td>
+<td>利雅得金融中心塔楼遭袭</td>
+<td>地缘/安全</td>
+<td>沙特多国联军声明：利雅得金融区一塔楼遇袭，系恐怖袭击；有关部门正在勘查现场</td>
+<td>新增，地缘升级</td>
+<td>XOM/COP(原油风险溢价)+GLD(避险)</td>
+<td>🔴上涨/不确定</td>
+<td>胡塞/也门武装是否宣称负责；航运保险费率</td>
+</tr>
+<tr>
+<td>20:19</td>
+<td>霍尔木兹海峡三船遇袭</td>
+<td>地缘/航运</td>
+<td>UKMTO通报：23日20:25 GMT（北京24日4:25），三艘船向东驶经海峡时被不明抛射物击中，船员下落确认</td>
+<td>新增，航道风险实锤</td>
+<td>OIL/BDR(油运)/FMG(铁矿石)</td>
+<td>🟡上涨/中期</td>
+<td>袭击方身份确认；海峡通航实际中断与否</td>
+</tr>
+<tr>
+<td>22:08</td>
+<td>英伟达及相关芯片股盘前大跌</td>
+<td>科技/半导体</td>
+<td>NVDA -5.7%，AMD -6%，INTC -6.3%，MU -6.9%，MRVL -5.2%，ADI -10%；高盛称黄仁勋回归不足以扭转行业调整</td>
+<td>新增但延续，分析师判断更新</td>
+<td>NVDA/AMD/MU/INTC/AAPL供应链</td>
+<td>🔴下跌/短期</td>
+<td>今晚美股开盘方向；是否触发量化止损</td>
+</tr>
+<tr>
+<td>21:54</td>
+<td>高盛：仓位信号预示标普回报偏高</td>
+<td>科技/估值</td>
+<td>情绪与仓位指标降至"解放日"以来最低第36百分位，历史数据显示该区间标普各时段回报率高于均值</td>
+<td>反向对冲，利好</td>
+<td>SPY/QQQ</td>
+<td>🟢反弹/技术面</td>
+<td>基本面是否跟涨</td>
+</tr>
+<tr>
+<td>21:55</td>
+<td>黄仁勋复职引发参议员批评</td>
+<td>政治/公司治理</td>
+<td>共和党参议员麦考密克警告行政部门介入企业董事会事务开创危险先例；加州总检察长表示调查不受影响</td>
+<td>新增，治理风险</td>
+<td>NVDA(间接)</td>
+<td>⚪中性偏负面</td>
+<td>国会听证会不会影响运营</td>
+</tr>
+<tr>
+<td>22:03</td>
+<td>沙特2027年军费预计2630亿里亚尔</td>
+<td>地缘/财政</td>
+<td>沙特财政部预测2027年国防支出4670亿人民币，占预算显著比重；此前已请求盟友补充导弹拦截器</td>
+<td>新增，安全支出刚性</td>
+<td>❌无直接映射</td>
+<td>🟡支撑油价</td>
+<td>油价 vs 沙特的平衡</td>
+</tr>
+<tr>
+<td>21:41</td>
+<td>乌克兰寻求2027年外部支持1150亿欧元</td>
+<td>地缘/财政</td>
+<td>泽连斯基表示2027年需要1150亿欧元外部援助，谈判团队希望在12月或明年初达成协议</td>
+<td>新增，战争走向</td>
+<td>❌间接影响能源</td>
+<td>🟡不确定</td>
+<td>俄方态度及美方谈判立场</td>
+</tr>
+<tr>
+<td>21:31</td>
+<td>波兰称俄无人机短暂侵犯其领空</td>
+<td>地缘/北约</td>
+<td>俄无人机夜间空袭乌期间短暂进入波兰领空，波授权击落但因风险未实施；北约将部署预警机</td>
+<td>新增，北约边缘摩擦升级</td>
+<td>NOC/NDA(军工)</td>
+<td>🟡不确定性升高</td>
+<td>俄方回应；北约第五条触发可能性</td>
+</tr>
+<tr>
+<td>22:05</td>
+<td>黄仁勋回归相关：内部人士否认返聘离职员工安排</td>
+<td>科技/HR</td>
+<td>有英伟达内部人士透露没有听到返聘因辞职离职员工的相关安排，人事清洗仍存不确定性</td>
+<td>新增信息差</td>
+<td>NVDA</td>
+<td>⚪中性</td>
+<td>后续裁员/重组消息</td>
+</tr>
+<tr>
+<td>21:59</td>
+<td>比亚迪与英力士展开法国工厂独家谈判</td>
+<td>汽车/并购</td>
+<td>比亚迪宣布与INEOS Automotive就收购法国汉巴赫工厂开展排他性谈判，计划在当地生产面向欧洲消费者汽车</td>
+<td>新增战略扩展</td>
+<td>BYDDY/NAUT</td>
+<td>🟢长期利好/中性</td>
+<td>员工协商程序+最终交易价格</td>
+</tr>
+<tr>
+<td>21:45</td>
+<td>英国央行委员格林：适宜进一步收紧政策</td>
+<td>宏观/货币</td>
+<td>格林多次发言：3.6%工资增长意味着需进一步紧缩，3月SOFR基差定价有误，资金面充裕支撑稳健流动性</td>
+<td>新增央行声音</td>
+<td>GBP/UK Gilts</td>
+<td>🟡加息预期升温</td>
+<td>下次 MPC 投票倾向</td>
+</tr>
+<tr>
+<td>22:00</td>
+<td>世卫确认美国3例人感染H5N1禽流感，1人死亡</td>
+<td>公共卫生</td>
+<td>华盛顿州奶牛场3名工作人员感染，其中1人已有基础疾病并于11月初去世；尚无证据表明人际传播，风险评估为低</td>
+<td>新增生物安全</td>
+<td>JNJ/PFE(疫苗概念)</td>
+<td>⚪低直接影响</td>
+<td>疫情是否会扩散到其他州</td>
+</tr>
+<tr>
+<td>22:00</td>
+<td>日本文件共享系统屡遭入侵或暂停</td>
+<td>科技/网络安全</td>
+<td>日本政府"政府解决方案服务"今年至少两次遭非法访问，个人信息泄露，古川俊治称如有漏洞可能暂停使用</td>
+<td>新增安全事件</td>
+<td>CTSH/TFC(日企)</td>
+<td>⚪日本股市偏弱</td>
+<td>是否有更多细节披露</td>
+</tr>
+<tr>
+<td>20:22</td>
+<td>摩根大通与汇丰首次在伦敦交易数字黄金</td>
+<td>金融/创新</td>
+<td>世界黄金协会牵头，摩根大通/汇丰/StoneX完成首笔实物金条部分所有权权益交易并用作抵押品，试验阶段</td>
+<td>结构性创新，里程碑意义</td>
+<td>GLD/PHYS(黄金ETF)</td>
+<td>🟢利好金价中长期</td>
+<td>推广速度+参与者范围</td>
+</tr>
+<tr>
+<td>20:45</td>
+<td>海港研究首次覆盖特斯拉给予买入评级，目标475美元</td>
+<td>科技/汽车</td>
+<td>Seaport Research Partners首次覆盖TSLA给予"买入"，目标价475美元，此前瑞银上调目标至430美元</td>
+<td>新增评级</td>
+<td>TSLA</td>
+<td>🟢短期催化</td>
+<td>市场能否接受</td>
+</tr>
+<tr>
+<td>20:30</td>
+<td>小米汽车计划明年Q3率先进入德国市场</td>
+<td>汽车/出海</td>
+<td>小米集团管理层在三季报电话会上表示海外销售网络建设按计划推进，预计2027年Q3率先进入德国</td>
+<td>新增出海节奏</td>
+<td>XIOMI(01810.HK)</td>
+<td>🟢品牌效应</td>
+<td>认证+充电桩基建进度</td>
+</tr>
+<tr>
+<td>20:11</td>
+<td>阿里健康上半年营收182.28亿元，净利降12.2%</td>
+<td>医疗/电商</td>
+<td>总收入同比增9.2%，但净利润同比降12.2%至11.12亿元；加大医药供应链和医疗AI投入，主动优化品类结构</td>
+<td>盈利压力显现</td>
+<td>ARHF(0241.HK)</td>
+<td>⚪中性偏空</td>
+<td>下半年能否扭亏</td>
+</tr>
+<tr>
+<td>20:05</td>
+<td>德国商业银行预计铂金2027年涨至1800美元/盎司</td>
+<td>商品/贵金属</td>
+<td>德银同时预测钯金2027年涨至1300美元/盎司，白银年底触及50美元，黄金2027年Q4达4100-4500美元</td>
+<td>投行预测汇总</td>
+<td>GOLD/NEM等矿业股</td>
+<td>🟢看涨/观望</td>
+<td>实际达成概率评估</td>
+</tr>
+<tr>
+<td>20:59</td>
+<td>国家数据局启动数字经济十五五行动计划</td>
+<td>政策/数字</td>
+<td>到2030年数字经济核心产业增加值占GDP比重达到12.5%，统筹数据基础制度构建和基础设施建设</td>
+<td>新增政策驱动</td>
+<td>科大讯飞/东方国信</td>
+<td>🟢利好AI+数据要素</td>
+<td>具体项目落地节奏</td>
+</tr>
+<tr>
+<td>20:15</td>
+<td>小鹏发布图灵世界模型WorldGPT</td>
+<td>科技/AI</td>
+<td>全球首个能在水陆空三栖六类本体完成预测与行动规划的世界模型，承担云端teacher model使命</td>
+<td>新增产品发布</td>
+<td>XPEV/小鹏汽车供应链</td>
+<td>🟢短期情绪</td>
+<td>量产落地时间表</td>
+</tr>
+<tr>
+<td>21:43</td>
+<td>神雾节能收到行政处罚事先告知书，将被ST</td>
+<td>公司/合规</td>
+<td>子公司虚增2024年营收6945万/利润1297万，江西证监局拟罚560万+5名责任人合计罚1570万，11月26日复牌变更为ST节能</td>
+<td>新增退市风险</td>
+<td>❌直接利空该股</td>
+<td>🔴下跌/警示</td>
+<td>是否触发退市红线</td>
+</tr>
+<tr>
+<td>21:27</td>
+<td>天齐锂业拟68.72亿元收购锂矿资产</td>
+<td>资源/并购</td>
+<td>收购润丰矿业76.53%股权+天齐兴宇100%+上都布探矿权，烧炭沟脉石英锂辉石矿采矿权评估值74.59亿元，目前待建设阶段</td>
+<td>新增资源扩张</td>
+<td>TQLE(002466.SZ)/赣锋锂业</td>
+<td>🟢长期利好</td>
+<td>扩界/扩产审批进展</td>
+</tr>
+<tr>
+<td>20:26</td>
+<td>谷歌收购伦敦国王十字区办公楼扩建AI研发中心</td>
+<td>科技/地产</td>
+<td>谷歌宣布收购6 Pancras Square大楼，容纳数千员工参与Gemini/搜索/YouTube开发</td>
+<td>新增AI基建投入</td>
+<td>GOOG/GOOGL</td>
+<td>🟢科技股长期利好</td>
+<td>收购完成时间</td>
+</tr>
+<tr>
+<td>21:20</td>
+<td>B站管理层：AI广告收入同比增长近95%</td>
+<td>媒体/AI</td>
+<td>B站三季度业绩会透露AI相关广告收入同比增近95%，AIGC已广泛用于广告封面标题创作，AI Agent广告投放内测中</td>
+<td>新增AI商业化进展</td>
+<td>BILI</td>
+<td>🟢财报利好</td>
+<td>毛利率改善幅度</td>
+</tr>
+<tr>
+<td>20:32</td>
+<td>红皮书商业零售销售年率+11.3%，前值9.5%</td>
+<td>宏观/消费</td>
+<td>美国11月前3周零售销售额同比增11.3%，远超市场预期的9.5%，显示假日购物季开端强劲</td>
+<td>超预期数据</td>
+<td>XOM/CVX(消费相关)</td>
+<td>🟡通胀预期升温</td>
+<td>是否抵消降息预期</td>
+</tr>
+<tr>
+<td>21:30</td>
+<td>奥本海默首次覆盖Anthropic给予跑赢大盘评级</td>
+<td>科技/AI</td>
+<td>目标价150美元；但同时Anthropic盘前跳水跌破83美元IPO发行价，内部模型过于强大难以公开发布的消息发酵</td>
+<td>矛盾信号</td>
+<td>ANTM(上市前)</td>
+<td>🟡分化</td>
+<td>是否引发监管关注</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s6">四、主题归纳（按交易优先级排序）</h2>
+<p><strong>【主线① 关税升级 → 美股承压，避险配置机会】</strong></p>
+<p>特朗普政府拟本周二宣布新一轮关税，覆盖欧盟+14国。VIX暴涨22%至32上方是最直接的市场定价。标普500仓位处于"解放日"以来最低第36百分位，历史上该区间后续回报率偏高，存在技术性反弹空间。建议配置：做多VIX相关产品（如UVXY）、黄金ETF(GLD)，做空纳指期货(PSF)。</p>
+<p><strong>【主线② 中东冲突外溢 → 油价支撑，航运股关注】</strong></p>
+<p>霍尔木兹海峡三船遇袭+利雅得塔楼遭袭是继伊朗封锁威胁后的实质性升级。沙特紧急求购拦截器说明防空压力骤增。布伦特突破88美元，WTI回到81美元上方。关注方向：油服板块(OIH)、油轮(FRO)、天然气(TTG)。</p>
+<p><strong>【主线③ 半导体板块深度回调 → 非黄仁勋一人之过】</strong></p>
+<p>黄仁勋回归仅消除管理层面最大不确定性，但高盛明确指出行业面临融资成本高、数据中心建设瓶颈、算力过剩、AI收入回报率未知四大结构性问题。NVDA/AMD/MU/INTC/ADI全线崩跌，且内部人士否认返聘离职员工安排——人事动荡仍在继续。短线不宜抄底，等待Q4业绩指引确认底部。</p>
+<p><strong>【支线 中国数字政策驱动 A股数据要素】</strong></p>
+<p>国家数据局十五五行动计划落地，目标2030年核心产业占GDP 12.5%。吉林省长专题会议推动绿醇燃料应用，目标2028年万辆级。AI广告收入井喷（B站+95%）验证商业化进展。关注：数据要素标的、绿色甲醇产业链。</p>
+<hr>
+<h2 id="s7">五、跨市场传导</h2>
+<div class="tw"><table><thead><tr>
+<th>海外/宏观事件</th>
+<th>美股影响</th>
+<th>港股影响</th>
+<th>A股影响</th>
+<th>传导路径</th>
+<th>强度</th>
+<th>结论</th>
+</tr></thead><tbody>
+<tr>
+<td>美国对欧盟及14国加征关税</td>
+<td>🔴 纳指期货-2.3%，VIX+22%</td>
+<td>🟡 恒生科技承压</td>
+<td>🟡 出口链偏弱</td>
+<td>风险偏好↓→成长股杀估值</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>周二正式公告后大概率进一步下挫</td>
+</tr>
+<tr>
+<td>霍尔木兹海峡三船遇袭</td>
+<td>🟡 WTI 81+ 原油涨</td>
+<td>🔴 港股能源股偏强</td>
+<td>🟢 中海油/中国石油受益</td>
+<td>供给风险溢价↑</td>
+<td>⭐⭐⭐⭐</td>
+<td>布伦特88已计入部分风险，若海峡中断则飙升至95+</td>
+</tr>
+<tr>
+<td>黄仁勋回归+半导体股暴跌</td>
+<td>🔴 NVDA -5.7% 苹果链走弱</td>
+<td>🟡 港股半导体估值受压</td>
+<td>🟢 AI概念分歧加大</td>
+<td>情绪传染 &gt; 基本面</td>
+<td>⭐⭐⭐</td>
+<td>短线继续压制，中线取决于Q4业绩</td>
+</tr>
+<tr>
+<td>英国央行鹰派表态</td>
+<td>🟡 英镑走强</td>
+<td>🟡 港股人民币贬值压力增加</td>
+<td>🟢 外资回流港股机会</td>
+<td>利率预期差</td>
+<td>⭐⭐⭐</td>
+<td>关注港元挂钩稳定性</td>
+</tr>
+<tr>
+<td>中国国家数据局十五五计划</td>
+<td>❌</td>
+<td>🟢 恒生科技反弹动力</td>
+<td>🟢 数据要素/AI概念股</td>
+<td>政策驱动型</td>
+<td>⭐⭐⭐</td>
+<td>明日A股开盘重点观察</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s8">六、重点交易线索</h2>
+<p><strong>最值得关注的3个方向：</strong></p>
+<ol>
+<li><strong>做关税交易</strong>：周二美国贸易代表办公室公布关税调查结果，若税率超预期（≥25%），SPY可能再跌3-5%，同时触发VIX Spike策略；反之若豁免范围大，风险资产将迎来技术性反弹。
+</li>
+<li><strong>能源股逢低吸筹</strong>：布伦特88美元已反映一定地缘溢价，但霍尔木兹海峡实际中断概率仍在上升，沙特求援拦截器说明防空能力吃紧。建议建立OIL多头对冲组合。
+</li>
+<li><strong>黄金突破交易</strong>：摩根大通/德银一致看2027年金价4100-4500美元，叠加地缘风险+去美元化叙事（数字黄金试点），GLD可考虑分批建仓。
+</li>
+</ol>
+<p><strong>最可能引发异动的3个方向：</strong></p>
+<ol>
+<li>特斯拉（TSLA）——双评级上调（UBS→430，Seaport→475），但大盘偏弱压制上涨空间
+</li>
+<li>英伟达（NVDA）——黄仁勋回归vs盘前暴跌5.7%，明天开盘多空对决激烈
+</li>
+<li>A股数据要素概念股——政策利好集中释放，明日可能普涨
+</li>
+</ol>
+<p><strong>最具持续性的3条逻辑：</strong></p>
+<ol>
+<li>AI商业化加速（B站+95%验证）→ 推荐长期持有优质AI标的
+</li>
+<li>绿醇燃料政策支持（吉林万辆级目标）→ 甲醇产业链中长期看好
+</li>
+<li>数字黄金基础设施升级 → 黄金市场流动性提升，长期支撑金价
+</li>
+</ol>
+<p><strong>需回避的方向：</strong></p>
+<ul>
+<li>半导体个股（除非出现超卖反弹信号）
+</li>
+<li>神雾节能（000820）—— ST风险，26日停牌复牌后大概率跌停
+</li>
+<li>任何纯关税敏感型出口股
+</li>
+</ul>
+<hr>
+<h2 id="s9">关注池命中（11/24 22:27）</h2>
+<blockquote>关注池未配置（watchlist.json items 为空）。用 <code>python watchlist.py add --name X --code Y --keywords ...</code> 添加。</blockquote>
+<hr>
+<h2 id="s10">闭环命中率统计（跨窗聚合）</h2>
+<blockquote>数据源：judgments.json（权威判断库单一源）。净成立率 =（成立 + 0.5×部分成立）/（成立+部分成立+证伪+失效）。</blockquote>
+<div class="tw"><table><thead><tr>
+<th>维度</th>
+<th>成立</th>
+<th>部分成立</th>
+<th>证伪</th>
+<th>失效</th>
+<th>未知</th>
+<th>合计</th>
+<th>净成立率</th>
+</tr></thead><tbody>
+<tr>
+<td>全部</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<blockquote>⚠️ 样本量 0 &lt; 10，命中率仅供参考，不宜过度解读（待积累更多窗口）。</blockquote>
+<hr>
+<h2 id="s11">回测归因（判断方向 × 后续价格交叉验证）</h2>
+<blockquote>口径：方向须显式提供（judgment.direction / overrides），否则标「待核实」；基准价取&lt;=决策窗最后一点，前视价取其后第一点；unit=% 的序列按百分点差（pp），其余 move=（前视-基准）/基准；|move|&lt;=0.3% 记「中性」。价格序列为快讯单源（待核实），归因仅供交叉参考。</blockquote>
+<div class="tw"><table><thead><tr>
+<th>裁定</th>
+<th>条数</th>
+</tr></thead><tbody>
+<tr>
+<td>正确</td>
+<td>0</td>
+</tr>
+<tr>
+<td>错误</td>
+<td>0</td>
+</tr>
+<tr>
+<td>中性</td>
+<td>0</td>
+</tr>
+<tr>
+<td>待核实</td>
+<td>0</td>
+</tr>
+</tbody></table></div>
+<p><strong>净命中率（正确/(正确+错误)）：</strong> — ｜ <strong>可归因覆盖率：</strong> —（已裁定方向且有价格基准 0/0）</p>
+<blockquote>⚠️ 已裁定样本 &lt; 5，归因结论仅供参考，不宜过度解读。</blockquote>
+</div>
+</body>
+</html>
