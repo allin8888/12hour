@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>近12小时财经快讯交易筛选报告</title>
+<style>
+:root{--bg:#f7f8fa;--card:#ffffff;--text:#1f2328;--muted:#5b6570;--line:#e3e6ea;--accent:#1a56db;--head:#f0f3f8;--up:#e0463e;--down:#1aa05a;--flat:#5b6570;}
+*{box-sizing:border-box;}
+body{margin:0;padding:28px 16px 60px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.75;}
+.wrap{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+border-radius:10px;padding:32px 34px 48px;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+h1{font-size:26px;margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--accent);letter-spacing:.5px;}
+h2{font-size:20px;margin:34px 0 14px;padding-left:11px;border-left:5px solid var(--accent);}
+h3{font-size:17px;margin:26px 0 10px;color:#243b7a;}
+h4{font-size:15px;margin:18px 0 8px;color:var(--muted);}
+p{margin:9px 0;}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0;}
+ul,ol{margin:9px 0 9px 22px;padding:0;}
+li{margin:5px 0;}
+code{background:#f2f4f7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;}
+strong{color:#0b2f6b;}
+/* MP-3/MP-4 引用块与链接 */
+blockquote{margin:10px 0;padding:8px 14px;border-left:4px solid var(--accent);background:#f8fafc;color:var(--muted);border-radius:0 6px 6px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+/* P1-1 目录导航 */
+.toc{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 26px;}
+.toc-title{font-weight:600;margin-bottom:8px;color:var(--accent);}
+.toc ul{list-style:none;margin:0;padding-left:0;}
+.toc li{margin:4px 0;}
+.toc li.lv1{font-weight:600;}
+.toc li.lv3{padding-left:18px;font-size:13.5px;color:var(--muted);}
+.toc a{color:var(--accent);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+/* P1-2 宽表横向滚动 + 首列冻结 + 可滚动阴影提示 */
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:8px;
+box-shadow:inset -14px 0 12px -14px rgba(16,24,40,.18);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:900px;}
+th{background:var(--head);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);
+white-space:nowrap;color:#1c2b45;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+table th:first-child,table td:first-child{position:sticky;left:0;z-index:2;background:var(--card);}
+table th:first-child{background:var(--head);z-index:3;}
+tbody tr:nth-child(even){background:#fafbfc;}
+tbody tr:hover{background:#f0f5ff;}
+em{color:var(--muted);font-style:italic;}
+/* P0 sparkline 价格迷你图（明暗自适应，SVG 用 var(--accent)） */
+.spark{margin:14px 0;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);}
+.spark svg{display:block;width:100%;}
+.spark-empty{color:var(--muted);font-size:13px;}
+/* P1-1 涨跌语义（A 股惯例：涨红跌绿），统一 token */
+.move-up{color:var(--up);font-weight:600;}
+.move-down{color:var(--down);font-weight:600;}
+.move-flat{color:var(--flat);}
+/* P0-2 决策卡：一眼可见的交易结论 */
+.decision-card{margin:16px 0;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;background:linear-gradient(180deg,#fbfdff,#fff);}
+.decision-card.stance-up{border-left-color:var(--up);}
+.decision-card.stance-down{border-left-color:var(--down);}
+.decision-card.stance-flat,.decision-card.stance-watch{border-left-color:var(--muted);}
+.decision-card.stance-watch{border-left-color:#d98a00;}
+.dc-head{margin-bottom:6px;}
+.dc-stance{font-size:17px;font-weight:700;}
+.dc-stance.stance-up{color:var(--up);} .dc-stance.stance-down{color:var(--down);} .dc-stance.stance-flat,.dc-stance.stance-watch{color:var(--muted);} .dc-stance.stance-watch{color:#d98a00;}
+.dc-summary{margin:4px 0 10px;color:var(--text);}
+.dc-levels{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;}
+.dc-kv{display:flex;flex-direction:column;}
+.dc-k{font-size:12px;color:var(--muted);}
+.dc-v{font-size:15px;font-weight:600;}
+.dc-tlabel{font-size:12px;color:var(--muted);margin:4px 0 6px;}
+.dc-tickers{display:flex;flex-wrap:wrap;gap:8px;}
+.dc-tag{background:#f2f4f7;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;}
+.dc-tag i{color:var(--muted);font-style:normal;font-size:12px;}
+.decision-empty{color:var(--muted);border-left-color:var(--muted);}
+/* P0-2 数据不全横幅 */
+.banner-warn{margin:14px 0;padding:10px 14px;border:1px solid #f0c8c4;background:#fdf3f2;color:#b42318;border-radius:8px;font-weight:600;}
+/* P1-2 看板互链 */
+.dash-link{margin:14px 0;padding:9px 14px;border:1px solid var(--line);background:#f3f8ff;border-radius:8px;font-weight:600;}
+.dash-link a{color:var(--accent);}
+@media(prefers-color-scheme:dark){.banner-warn{background:#2a1c1b;border-color:#5b2a26;color:#ff9a8f;}.decision-card{background:linear-gradient(180deg,#1a2027,#1c2027);}.dash-link{background:#16202e;}}
+/* P2-4 移动端：表格不再强制 900px 最小宽度，表头允许换行（table 规则须置于块首） */
+@media(max-width:768px){table{min-width:0;font-size:12.5px;}th{white-space:normal;}body{padding:12px 6px;}.wrap{padding:18px 12px 32px;}h1{font-size:21px;}h2{font-size:17px;}.toc{padding:10px 12px;}}
+/* P2-2 深色模式（跟随系统） */
+@media(prefers-color-scheme:dark){
+:root{--bg:#15181d;--card:#1c2027;--text:#e6e9ef;--muted:#9aa4b2;--line:#2c323c;--accent:#6aa2ff;--head:#232a34;}
+code{background:#252b34;border-color:var(--line);}
+strong{color:#a9c6ff;}
+h3{color:#b9cdff;}
+.toc{background:#1a1f27;}
+blockquote{background:#1a1f27;}
+tbody tr:nth-child(even){background:#20252d;}
+tbody tr:hover{background:#26303d;}
+}
+/* P2-2 打印 / 导出 PDF */
+@media print{
+body{background:#fff;padding:0;}
+.wrap{border:0;box-shadow:none;max-width:none;padding:0;}
+.tw{overflow:visible;border:0;box-shadow:none;}
+table{min-width:0;font-size:11px;}
+th,td{padding:6px 8px;}
+table th:first-child,table td:first-child{position:static;}
+.toc{display:none;}
+h2{page-break-after:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv1"><a href="#s1">近12小时财经快讯交易筛选报告</a></li><li class="lv2"><a href="#s2">〇、30秒行动卡</a></li><li class="lv2"><a href="#s3">一、先看结论</a></li><li class="lv2"><a href="#s4">二、主题演进闭环表</a></li><li class="lv2"><a href="#s5">三、有效事件清单</a></li><li class="lv2"><a href="#s6">四、主题归纳</a></li><li class="lv2"><a href="#s7">五、跨市场传导</a></li><li class="lv2"><a href="#s8">六、重点交易线索</a></li></ul></nav>
+<h1 id="s1">近12小时财经快讯交易筛选报告</h1>
+<p><strong>生成时间：</strong> 2026-11-24 22:56 CST</p>
+<p><strong>覆盖区间：</strong> 2026-11-24 22:28 CST — 2026-11-24 22:56 CST（28m，增量窗口）</p>
+<p><strong>模板版本：</strong> v3</p>
+<p><strong>已读取来源：</strong> 新浪财经（44条）、东方财富（13条）、富途牛牛（9条）；⚠️ 华尔街见闻（0条）、同花顺（0条）数据缺失</p>
+<p><strong>统计：</strong> fetched=400, inWindow=66, hours=12 | ⚠️ 两源失败（华尔街见闻/同花顺空壳）</p>
+<h2 id="s2">〇、30秒行动卡</h2>
+<div class="tw"><table><thead><tr>
+<th>动作</th>
+<th>标的</th>
+<th>验证时间</th>
+</tr></thead><tbody>
+<tr>
+<td>盯NVDA能否止跌/AMD是否继续下探</td>
+<td>NVDA / AMD（美股）</td>
+<td>今日收盘</td>
+</tr>
+<tr>
+<td>若A/港股科技股跟跌 → 暂缓做多</td>
+<td>A股算力/光模块概念</td>
+<td>今日收盘后</td>
+</tr>
+</tbody></table></div>
+<h2 id="s3">一、先看结论</h2>
+<ol>
+<li><strong>AI芯片板块获利回吐剧烈</strong>：前日暴涨后今日NVDA跌超6%、AMD暴跌10%+，CoreWeave/IREN/Nebius等AI基建股集体重挫5-9%，短期情绪逆转信号明确。
+</li>
+<li><strong>美股开盘先抑后稳</strong>：道指一度跌0.6%，后翻红+0.2%；纳指仍跌1.5%，盘前三万亿市值蒸发告一段落但脆弱。
+</li>
+<li><strong>地缘风险持续升温</strong>：俄军持续打击乌克兰电力设施并击中黑海商船，世界粮食计划署警告三大贸易通道（霍尔木兹/曼德/黑海）受阻加剧全球粮食安全危机。
+</li>
+<li><strong>黄仁勋听证风波发酵</strong>：议员呼吁其公开作证，闭门简报会"不能替代"公开程序，后续合规风险待观察。
+</li>
+<li><strong>无新增S级交易线索</strong>——本窗以回调消化为主，建议观望而非追入。
+</li>
+</ol>
+<h2 id="s4">二、主题演进闭环表</h2>
+<p>上期无待验证项（增量窗口仅28分钟，内容有限）。</p>
+<h2 id="s5">三、有效事件清单</h2>
+<div class="tw"><table><thead><tr>
+<th>时间</th>
+<th>事件主题</th>
+<th>分类</th>
+<th>事实摘要</th>
+<th>新增性</th>
+<th>映射</th>
+<th>方向</th>
+<th>优先级</th>
+</tr></thead><tbody>
+<tr>
+<td>22:51</td>
+<td>AI芯片暴跌</td>
+<td>市场</td>
+<td>NVDA跌超6%，AMD暴跌10%+至406美元，前日暴涨后获利回吐</td>
+<td>新</td>
+<td>NVDA/AMD/SMH</td>
+<td>↓</td>
+<td>A</td>
+</tr>
+<tr>
+<td>22:40</td>
+<td>AI基建股重挫</td>
+<td>市场</td>
+<td>CoreWeave -8.3%, IREN -8.7%, Nebius -7.7%, NEOCLOUD ETF -6.5%</td>
+<td>新</td>
+<td>AVDL/CW/IREN</td>
+<td>↓</td>
+<td>A</td>
+</tr>
+<tr>
+<td>22:45</td>
+<td>道指V型反转</td>
+<td>市场</td>
+<td>道指从-0.6%翻红至+0.2%，但纳指仍跌1.5%</td>
+<td>更新</td>
+<td>SPX/NDX</td>
+<td>中性</td>
+<td>B</td>
+</tr>
+<tr>
+<td>22:40</td>
+<td>三大航道粮食危机</td>
+<td>地缘</td>
+<td>WFP警告霍尔木兹/曼德/黑海受阻推高粮能运成本，2.66亿人面临严重粮食不安全</td>
+<td>新</td>
+<td>DBLE/ADM/KO</td>
+<td>↓</td>
+<td>A</td>
+</tr>
+<tr>
+<td>22:52</td>
+<td>黄仁勋听证争议</td>
+<td>政策</td>
+<td>众议员米克斯要求黄仁勋公开作证，闭门简报会被认为"不足"</td>
+<td>新</td>
+<td>NVDA</td>
+<td>?</td>
+<td>B</td>
+</tr>
+<tr>
+<td>22:51</td>
+<td>俄打击乌变电站</td>
+<td>地缘</td>
+<td>俄武装力量白天袭击文尼察/切尔尼戈夫/罗夫诺州三座变电站</td>
+<td>更新</td>
+<td>UKR/欧洲能源</td>
+<td>↓</td>
+<td>C</td>
+</tr>
+<tr>
+<td>22:42</td>
+<td>美市值蒸发1万亿</td>
+<td>市场</td>
+<td>美股开盘时市值蒸发超1万亿美元（盘中修复部分）</td>
+<td>新</td>
+<td>全市场</td>
+<td>↓</td>
+<td>B</td>
+</tr>
+</tbody></table></div>
+<h2 id="s6">四、主题归纳</h2>
+<p><strong>① AI芯片/算力板块获利回吐（主线）</strong>：昨日NVDA单涨31%后引发的快速回调已成明确趋势，AMD跌幅甚至超过NVDA，显示出资金对AI估值过热的一致性担忧。短期避险情绪占优。</p>
+<p><strong>② 地缘扰动升级但未触发新的交易线</strong>：俄乌战场持续消耗战格局、黑海航运风险仍在，但市场对此已有定价（布伦特88/WTI 81附近），未见进一步突破引发新反应。</p>
+<p><strong>③ 美股震荡分化</strong>：道指率先企稳翻红，纳指因科技股权重仍承压，呈现典型的"防御轮换"特征。</p>
+<h2 id="s7">五、跨市场传导</h2>
+<div class="tw"><table><thead><tr>
+<th>海外事件</th>
+<th>美股影响</th>
+<th>港股影响</th>
+<th>A股影响</th>
+<th>传导路径</th>
+<th>强度</th>
+<th>结论</th>
+</tr></thead><tbody>
+<tr>
+<td>NVDA/AMD暴跌</td>
+<td>NVDA-6%/AMD-10%</td>
+<td>大概率跟跌</td>
+<td>算力/AI概念股承压</td>
+<td>情绪→估值重估</td>
+<td>强</td>
+<td>A股明日科技板块或有低开压力</td>
+</tr>
+<tr>
+<td>三大航道危机</td>
+<td>—</td>
+<td>能源股受支撑</td>
+<td>航运/粮食股关注</td>
+<td>供给担忧→溢价</td>
+<td>中</td>
+<td>油价高位已定价，边际变化小</td>
+</tr>
+<tr>
+<td>道指V型反转</td>
+<td>道+0.2%纳-1.5%</td>
+<td>跟随波动</td>
+<td>早盘情绪参考</td>
+<td>资金轮动</td>
+<td>弱</td>
+<td>分化行情延续</td>
+</tr>
+</tbody></table></div>
+<h2 id="s8">六、重点交易线索</h2>
+<p><strong>值得关注：</strong></p>
+<ul>
+<li>英伟达(NVDA)能否在200美元附近获得支撑——若跌破则可能引发ETF级抛售
+</li>
+<li>AMD(AMD)日内振幅已超10%，关注收盘能否收回410美元上方
+</li>
+<li>粮食危机背景下，DBLE/KO等供应链标的或有防御属性
+</li>
+</ul>
+<p><strong>需回避：</strong></p>
+<ul>
+<li>追高AI概念股（今日已证明回调力度）
+</li>
+<li>黑海航线依赖的能源/粮食进口敞口
+</li>
+</ul>
+<p><strong>低价值噪音：</strong></p>
+<ul>
+<li>艾滋病报告/瑞士银行声明/麻疹病例（无直接交易意义）
+</li>
+<li>乌兹别克斯坦党际交流（无量化影响）
+</li>
+</ul>
+</div>
+</body>
+</html>
