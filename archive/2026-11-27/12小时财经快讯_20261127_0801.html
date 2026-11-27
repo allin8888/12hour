@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>近12小时财经快讯交易筛选报告</title>
+<style>
+:root{--bg:#f7f8fa;--card:#ffffff;--text:#1f2328;--muted:#5b6570;--line:#e3e6ea;--accent:#1a56db;--head:#f0f3f8;--up:#e0463e;--down:#1aa05a;--flat:#5b6570;}
+*{box-sizing:border-box;}
+body{margin:0;padding:28px 16px 60px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.75;}
+.wrap{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+border-radius:10px;padding:32px 34px 48px;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+h1{font-size:26px;margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--accent);letter-spacing:.5px;}
+h2{font-size:20px;margin:34px 0 14px;padding-left:11px;border-left:5px solid var(--accent);}
+h3{font-size:17px;margin:26px 0 10px;color:#243b7a;}
+h4{font-size:15px;margin:18px 0 8px;color:var(--muted);}
+p{margin:9px 0;}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0;}
+ul,ol{margin:9px 0 9px 22px;padding:0;}
+li{margin:5px 0;}
+code{background:#f2f4f7;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;}
+strong{color:#0b2f6b;}
+/* MP-3/MP-4 引用块与链接 */
+blockquote{margin:10px 0;padding:8px 14px;border-left:4px solid var(--accent);background:#f8fafc;color:var(--muted);border-radius:0 6px 6px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+/* P1-1 目录导航 */
+.toc{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 18px;margin:0 0 26px;}
+.toc-title{font-weight:600;margin-bottom:8px;color:var(--accent);}
+.toc ul{list-style:none;margin:0;padding-left:0;}
+.toc li{margin:4px 0;}
+.toc li.lv1{font-weight:600;}
+.toc li.lv3{padding-left:18px;font-size:13.5px;color:var(--muted);}
+.toc a{color:var(--accent);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+/* P1-2 宽表横向滚动 + 首列冻结 + 可滚动阴影提示 */
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:8px;
+box-shadow:inset -14px 0 12px -14px rgba(16,24,40,.18);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:900px;}
+th{background:var(--head);font-weight:600;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);
+white-space:nowrap;color:#1c2b45;}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+table th:first-child,table td:first-child{position:sticky;left:0;z-index:2;background:var(--card);}
+table th:first-child{background:var(--head);z-index:3;}
+tbody tr:nth-child(even){background:#fafbfc;}
+tbody tr:hover{background:#f0f5ff;}
+em{color:var(--muted);font-style:italic;}
+/* P0 sparkline 价格迷你图（明暗自适应，SVG 用 var(--accent)） */
+.spark{margin:14px 0;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);}
+.spark svg{display:block;width:100%;}
+.spark-empty{color:var(--muted);font-size:13px;}
+/* P1-1 涨跌语义（A 股惯例：涨红跌绿），统一 token */
+.move-up{color:var(--up);font-weight:600;}
+.move-down{color:var(--down);font-weight:600;}
+.move-flat{color:var(--flat);}
+/* P0-2 决策卡：一眼可见的交易结论 */
+.decision-card{margin:16px 0;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;background:linear-gradient(180deg,#fbfdff,#fff);}
+.decision-card.stance-up{border-left-color:var(--up);}
+.decision-card.stance-down{border-left-color:var(--down);}
+.decision-card.stance-flat,.decision-card.stance-watch{border-left-color:var(--muted);}
+.decision-card.stance-watch{border-left-color:#d98a00;}
+.dc-head{margin-bottom:6px;}
+.dc-stance{font-size:17px;font-weight:700;}
+.dc-stance.stance-up{color:var(--up);} .dc-stance.stance-down{color:var(--down);} .dc-stance.stance-flat,.dc-stance.stance-watch{color:var(--muted);} .dc-stance.stance-watch{color:#d98a00;}
+.dc-summary{margin:4px 0 10px;color:var(--text);}
+.dc-levels{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;}
+.dc-kv{display:flex;flex-direction:column;}
+.dc-k{font-size:12px;color:var(--muted);}
+.dc-v{font-size:15px;font-weight:600;}
+.dc-tlabel{font-size:12px;color:var(--muted);margin:4px 0 6px;}
+.dc-tickers{display:flex;flex-wrap:wrap;gap:8px;}
+.dc-tag{background:#f2f4f7;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;}
+.dc-tag i{color:var(--muted);font-style:normal;font-size:12px;}
+.decision-empty{color:var(--muted);border-left-color:var(--muted);}
+/* P0-2 数据不全横幅 */
+.banner-warn{margin:14px 0;padding:10px 14px;border:1px solid #f0c8c4;background:#fdf3f2;color:#b42318;border-radius:8px;font-weight:600;}
+/* P1-2 看板互链 */
+.dash-link{margin:14px 0;padding:9px 14px;border:1px solid var(--line);background:#f3f8ff;border-radius:8px;font-weight:600;}
+.dash-link a{color:var(--accent);}
+@media(prefers-color-scheme:dark){.banner-warn{background:#2a1c1b;border-color:#5b2a26;color:#ff9a8f;}.decision-card{background:linear-gradient(180deg,#1a2027,#1c2027);}.dash-link{background:#16202e;}}
+/* P2-4 移动端：表格不再强制 900px 最小宽度，表头允许换行（table 规则须置于块首） */
+@media(max-width:768px){table{min-width:0;font-size:12.5px;}th{white-space:normal;}body{padding:12px 6px;}.wrap{padding:18px 12px 32px;}h1{font-size:21px;}h2{font-size:17px;}.toc{padding:10px 12px;}}
+/* P2-2 深色模式（跟随系统） */
+@media(prefers-color-scheme:dark){
+:root{--bg:#15181d;--card:#1c2027;--text:#e6e9ef;--muted:#9aa4b2;--line:#2c323c;--accent:#6aa2ff;--head:#232a34;}
+code{background:#252b34;border-color:var(--line);}
+strong{color:#a9c6ff;}
+h3{color:#b9cdff;}
+.toc{background:#1a1f27;}
+blockquote{background:#1a1f27;}
+tbody tr:nth-child(even){background:#20252d;}
+tbody tr:hover{background:#26303d;}
+}
+/* P2-2 打印 / 导出 PDF */
+@media print{
+body{background:#fff;padding:0;}
+.wrap{border:0;box-shadow:none;max-width:none;padding:0;}
+.tw{overflow:visible;border:0;box-shadow:none;}
+table{min-width:0;font-size:11px;}
+th,td{padding:6px 8px;}
+table th:first-child,table td:first-child{position:static;}
+.toc{display:none;}
+h2{page-break-after:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv1"><a href="#s1">近12小时财经快讯交易筛选报告</a></li><li class="lv2"><a href="#s2">一、先看结论（≤5）</a></li><li class="lv2"><a href="#s3">二、主题演进闭环表（上期待验证项逐条裁定）</a></li><li class="lv2"><a href="#s4">三、有效事件清单（S/A/B，映射并入列）</a></li><li class="lv2"><a href="#s5">四、主题归纳（不重复映射列）</a></li><li class="lv2"><a href="#s6">五、跨市场传导</a></li><li class="lv2"><a href="#s7">六、重点交易线索（≤6）</a></li><li class="lv2"><a href="#s8">附：风险与待核实</a></li></ul></nav>
+<h1 id="s1">近12小时财经快讯交易筛选报告</h1>
+<ul>
+<li><strong>生成时间</strong>：2026-11-27 08:01（北京时间）
+</li>
+<li><strong>覆盖区间</strong>：2026-11-26 08:01 → 2026-11-27 08:01（12h，增量收敛自 11/26 20:04 报告，⚠️ 上期缺口 11h57m，已按 12h 窗口重采覆盖）
+</li>
+<li><strong>已读取来源</strong>：新浪、同花顺、富途、华尔街见闻、东方财富
+</li>
+<li><strong>统计行</strong>（照抄脚本输出）：本期窗口 2564 条（压缩为 912 条）；五源分布：新浪 595 / 同花顺 499 / 富途 556 / 华尔街见闻 501 / 东方财富 413；去重率 64%
+</li>
+<li><strong>oldest 覆盖校验</strong>：
+<ul>
+<li>新浪：oldest 2026-11-26 08:00 ✓ 完整覆盖（1500页/24h窗口）
+</li>
+<li>同花顺：oldest 2026-11-27 00:04（latest 11-26 20:59），仅覆盖夜间 20:59→次日 00:04 约 3h，白天 08:01-20:59 未采集（翻页仅2页）⚠️
+</li>
+<li>富途：oldest 2026-11-26 21:29，覆盖 21:29→次日 08:00 ⚠️
+</li>
+<li>华尔街见闻：oldest 2026-11-25 21:27 ✓ 完整覆盖（1200页）
+</li>
+<li>东方财富：oldest 2026-11-26 20:00，覆盖 20:00→次日 08:00 ⚠️
+</li>
+<li>注：白天 08:01-20:00 时段主要靠新浪+华尔街见闻双源覆盖，上述⚠️源未覆盖时段不当作"无新闻"
+</li>
+</ul>
+</li>
+<li><strong>跨时段标注</strong>：本窗覆盖北京时间 A股交易时段（11/26 08:01→15:00 收盘）+ 欧市 + 美市（11/25-26 收盘）+ 国内期货夜盘/早盘（11/27 07:14-07:25）。美股 11/27 开盘（北京时间 21:30）尚未发生，混合窗结论落到最近下一交易时段验证。
+</li>
+</ul>
+<p><strong>路线B产物</strong>：</p>
+<ul>
+<li>关注池命中：本期无命中（watchlist 无匹配条目）
+</li>
+<li>闭环命中率（近7天 S 级）：0.125 / 0.125 / 0.25 / 0.25 / 0.25
+</li>
+</ul>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>布伦特原油 走势</title><polyline points="8.0,48.0 75.0,50.0 142.0,45.3 209.0,46.9 276.0,38.6 343.0,37.3 410.0,20.0" fill="none" stroke="var(--up)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="410.0" cy="20.0" r="3.2" fill="var(--up)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--up)">96.57 美元/桶</text><text x="8" y="12" font-size="11" fill="var(--muted)">布伦特原油（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:00</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/27 08:01</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>WTI 原油 走势</title><polyline points="8.0,50.0 142.0,40.0 276.0,23.2 410.0,20.0" fill="none" stroke="var(--up)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="410.0" cy="20.0" r="3.2" fill="var(--up)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--up)">84 美元/桶</text><text x="8" y="12" font-size="11" fill="var(--muted)">WTI 原油（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:27</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/26 20:00</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>黄金 走势</title><polyline points="8.0,26.4 65.4,20.0 122.9,50.0 180.3,27.0 237.7,27.3 295.1,27.1 352.6,27.0 410.0,27.0" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="410.0" cy="27.0" r="3.2" fill="var(--down)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--down)">3566.75 美元/盎司</text><text x="8" y="12" font-size="11" fill="var(--muted)">黄金（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:00</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/27 08:01</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>费半涨跌幅 走势</title><polyline points="8.0,20.0 142.0,45.2 276.0,50.0 410.0,40.0" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="410.0" cy="40.0" r="3.2" fill="var(--down)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--down)">-0.65 %</text><text x="8" y="12" font-size="11" fill="var(--muted)">费半涨跌幅（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:00</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/26 08:01</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>美债10Y 走势</title><polyline points="8.0,49.8 142.0,20.0 276.0,50.0 410.0,49.3" fill="none" stroke="var(--up)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="410.0" cy="49.3" r="3.2" fill="var(--up)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--up)">0.13 %</text><text x="8" y="12" font-size="11" fill="var(--muted)">美债10Y（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/24 22:00</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/26 20:00</text></svg></div>
+<div class="spark"><svg viewBox="0 0 420 66" width="100%" style="max-width:420px;height:auto" role="img"><title>碳酸锂 走势</title><polyline points="8.0,20.0 410.0,50.0" fill="none" stroke="var(--down)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="410.0" cy="50.0" r="3.2" fill="var(--down)"/><text x="410.0" y="12.0" text-anchor="end" font-size="12" font-weight="600" fill="var(--down)">85000 元/吨</text><text x="8" y="12" font-size="11" fill="var(--muted)">碳酸锂（快讯单源，待核实）</text><text x="8" y="62" font-size="10" fill="var(--muted)">11/25 20:00</text><text x="410" y="62" font-size="10" fill="var(--muted)" text-anchor="end">11/26 20:00</text></svg></div>
+<hr>
+<h2 id="s2">一、先看结论（≤5）</h2>
+<ol>
+<li><strong>欧央行人事落定</strong>：德科斯（De Cos）将接替拉加德出任欧央行行长，荷兰撤回本国候选人诺特支持（FT 单源，待欧盟大使会正式确认）；叠加 10 月纪要"通胀前景恶化、12月第三次加息 25bp"→ 欧元偏鹰、欧债收益率上行风险（11/26 21:31-23:18 多源）。
+</li>
+<li><strong>A股回购增持再贷款制度化</strong>：央行等部门将股票回购增持再贷款由阶段性安排转为长期制度并下调利率，四大行已签约超 6000 亿元（农行单家超 1500 亿）→ A股回购/增持/高股息主题获政策增量（11/26 20:14-22:31）。
+</li>
+<li><strong>国内期货夜盘分化剧烈</strong>：11/27 早盘碳酸锂主力 -6.94%（延续上期 -7.20%），集运指数欧线 +5.93%、白银 +3.21%、棕榈油 +2.49% → 锂矿/航运/贵金属分化行情延续（11/27 07:14-07:25）。
+</li>
+<li><strong>美债"债王"事件 + 油价冲高</strong>：30Y 拍卖 5.018% 为 2007 年以来最高单源（待核实）；布伦特 96.57 美元 +6.29%（单源待核实，sparkline 96.57）；霍尔木兹局势 + 胡塞袭击炼油厂推动油价。
+</li>
+<li><strong>美 301 关税拟议升温</strong>：美贸易代表办对 14 个经济体（含中国）301 关税拟议措施，人民日报"产能过剩论"评论定调 → 出口链/跨境电商承压、内需替代受益（11/26 07:59，上期已埋伏笔）。
+</li>
+</ol>
+<hr>
+<h2 id="s3">二、主题演进闭环表（上期待验证项逐条裁定）</h2>
+<div class="tw"><table><thead><tr>
+<th>#</th>
+<th>上期事件</th>
+<th>优先级</th>
+<th>判定</th>
+<th>上期时点</th>
+<th>本窗证据</th>
+</tr></thead><tbody>
+<tr>
+<td>1</td>
+<td>理想 10 万贴息利率</td>
+<td>MOMENTUM</td>
+<td>延续待验</td>
+<td>11/27 14:22</td>
+<td>本窗无公开数据，理想 M 系预售（11/27 02:23）仍待核实，贴息利率未落地</td>
+</tr>
+<tr>
+<td>2</td>
+<td>理想 M 系预售</td>
+<td>MOMENTUM</td>
+<td>延续待验</td>
+<td>11/27 02:23</td>
+<td>本窗无预售量/交付数据</td>
+</tr>
+<tr>
+<td>3</td>
+<td>A股夜盘期货</td>
+<td>MOMENTUM</td>
+<td><strong>成立/延续</strong></td>
+<td>11/26 20:11-21:10</td>
+<td>11/27 07:14-07:25 国内期货早盘：碳酸锂 -6.94%（延续 -7.20%）、集运欧线 +5.93%（延续 +4.36%）、白银 +3.21%（延续 +3.73% 方向）、棕榈油 +2.49%</td>
+</tr>
+<tr>
+<td>4</td>
+<td>美股三大指数上涨</td>
+<td>MOMENTUM</td>
+<td><strong>成立</strong></td>
+<td>11/25 15:27</td>
+<td>11/26 美股收盘：标普 +0.42%、纳指 +0.29%、道指 +0.26%、半导体设备 +2.36%、黄金 -0.22%，科技反弹延续</td>
+</tr>
+<tr>
+<td>5</td>
+<td>碳酸锂连跌 7.20%</td>
+<td>MOMENTUM</td>
+<td><strong>成立/延续</strong></td>
+<td>11/26 08:00-09:00</td>
+<td>11/27 早盘碳酸锂主力 -6.94%，区间 154,450-165,800 元/吨，锂矿股（盛新锂能等）压力延续</td>
+</tr>
+<tr>
+<td>6</td>
+<td>A股北向净流出 22.811 亿</td>
+<td>MOMENTUM</td>
+<td>证据不足</td>
+<td>11/24-25</td>
+<td>本窗未采集到 11/26 北向资金数据；11/26 沪指 +1.42%（08:31 15min），资金面待 11/27 盘中验证</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s4">三、有效事件清单（S/A/B，映射并入列）</h2>
+<div class="tw"><table><thead><tr>
+<th>时点</th>
+<th>来源</th>
+<th>事件</th>
+<th>主题映射</th>
+<th>优先级</th>
+<th>状态</th>
+<th>影响面</th>
+<th>验证点</th>
+</tr></thead><tbody>
+<tr>
+<td>11/26 21:31</td>
+<td>富途/新浪/FT</td>
+<td>德科斯将任欧央行下一任行长，荷兰撤回诺特支持</td>
+<td>欧央行/欧洲利率</td>
+<td>S</td>
+<td>单源（FT 知情士），待大使会确认</td>
+<td>欧元区/欧债/欧元汇率</td>
+<td>周四下午欧盟大使会+领导人背书</td>
+</tr>
+<tr>
+<td>11/26 21:47</td>
+<td>新浪/纪要</td>
+<td>欧央行 10 月纪要：通胀前景恶化，12月第三次加息 25bp</td>
+<td>欧央行紧缩</td>
+<td>S</td>
+<td>正式纪要，已确认</td>
+<td>欧债收益率、欧元</td>
+<td>12月利率决议</td>
+</tr>
+<tr>
+<td>11/26 22:28</td>
+<td>东财/央视</td>
+<td>四大行签约上市公司回购增持贷款超 6000 亿元（农行 &gt;1500 亿）</td>
+<td>A股政策/回购增持</td>
+<td>S</td>
+<td>已确认（央行制度化+降息）</td>
+<td>A股回购、增持、高股息</td>
+<td>11/27 盘中回购增持主题板块</td>
+</tr>
+<tr>
+<td>11/26 21:41</td>
+<td>东财</td>
+<td>美 30Y 拍卖 5.018%，2007 年以来最高（"债王"）</td>
+<td>美债/利率</td>
+<td>S</td>
+<td>单源，待核实</td>
+<td>全球利率锚、美元资产</td>
+<td>官方拍卖数据交叉验证</td>
+</tr>
+<tr>
+<td>11/26 07:59</td>
+<td>东财/人民日报</td>
+<td>美 301 拟议对 14 经济体（含中国）加征关税；"产能过剩论"评论</td>
+<td>贸易/出口链</td>
+<td>S</td>
+<td>拟议，待落地</td>
+<td>出口/跨境电商/进口替代</td>
+<td>301 正式清单发布</td>
+</tr>
+<tr>
+<td>11/26 21:24</td>
+<td>新浪</td>
+<td>布伦特 96.57 美元 +6.29%（霍尔木兹局势）</td>
+<td>油价/通胀</td>
+<td>A</td>
+<td>单源待核实（sparkline 一致 96.57）</td>
+<td>油气板块、通胀预期</td>
+<td>多源油价交叉</td>
+</tr>
+<tr>
+<td>11/26 07:06</td>
+<td>新浪</td>
+<td>美国 5G 芯片出口禁令</td>
+<td>半导体/出口管制</td>
+<td>A</td>
+<td>已确认</td>
+<td>中国 5G 设备商</td>
+<td>禁令细则/执法</td>
+</tr>
+<tr>
+<td>11/26 22:13</td>
+<td>新浪/富途</td>
+<td>北约与美 20+ 新军事基地，爱国者/萨德/战斧产能</td>
+<td>军工/防务</td>
+<td>A</td>
+<td>已确认（特朗普声明）</td>
+<td>军工/防务股</td>
+<td>基地落地节奏</td>
+</tr>
+<tr>
+<td>11/27 07:14</td>
+<td>新浪/东财</td>
+<td>国内期货早盘：碳酸锂 -6.94%、集运欧线 +5.93%、白银 +3.21%、棕榈油 +2.49%</td>
+<td>商品期货</td>
+<td>A</td>
+<td>已确认（盘面）</td>
+<td>锂矿/航运/贵金属</td>
+<td>11/27 日盘延续性</td>
+</tr>
+<tr>
+<td>11/27 03:49</td>
+<td>新浪</td>
+<td>黄仁勋：28 岁员工因重组失去工作</td>
+<td>AI/情绪</td>
+<td>A</td>
+<td>单源待核实</td>
+<td>AI 情绪面</td>
+<td>后续澄清/人事公告</td>
+</tr>
+<tr>
+<td>11/26 00:46</td>
+<td>新浪</td>
+<td>比特币升破 6 万美元（亚洲 +2.2%），币安提现恢复</td>
+<td>加密</td>
+<td>A</td>
+<td>已确认</td>
+<td>加密/风险资产</td>
+<td>假日交易清淡</td>
+</tr>
+<tr>
+<td>11/26 21:54</td>
+<td>富途</td>
+<td>11/26 美股收盘：标普 +0.42%、纳指 +0.29%、半导体设备 +2.36%</td>
+<td>美股科技</td>
+<td>B</td>
+<td>已确认</td>
+<td>科技链传导</td>
+<td>11/27 美股开盘</td>
+</tr>
+<tr>
+<td>11/26 07:44</td>
+<td>新浪</td>
+<td>6G 概念股：机构 11 月净买入 &gt;10 亿 4 只（雷电微力等）</td>
+<td>6G/通信</td>
+<td>B</td>
+<td>已确认</td>
+<td>6G 主题</td>
+<td>6G 标准进展</td>
+</tr>
+<tr>
+<td>11/26 21:41</td>
+<td>东财</td>
+<td>英国 2Y 国债收益率 +8bp 至 4.86%</td>
+<td>英债</td>
+<td>B</td>
+<td>已确认</td>
+<td>英债/利差</td>
+<td>英央行路径</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="s5">四、主题归纳（不重复映射列）</h2>
+<ul>
+<li><strong>欧洲紧缩 + 人事</strong>：德科斯接任 + 纪要鹰派 → 欧元区 12月加息 25bp 预期强化，德债/法债收益率上行，欧元偏强。
+</li>
+<li><strong>A股政策底</strong>：回购增持再贷款制度化 + 利率下调 → 四大行投放 &gt;6000 亿，回购/增持/高股息主题具备政策增量，11/26 沪指 +1.42% 印证。
+</li>
+<li><strong>商品分化</strong>：油价（布伦特 96.57 待核实，霍尔木兹 + 胡塞袭炼油厂）vs 锂（碳酸锂 -6.94% 延续）vs 航运（集运欧线 +5.93%）vs 贵金属（白银 +3.21%，金价 3566 震荡）。
+</li>
+<li><strong>贸易摩擦</strong>：美 301 拟议 + 5G 芯片出口禁令 + 荷兰抵制美《硬件技术管制多边协调法案》→ 半导体/出口链受压、内需替代受益。
+</li>
+<li><strong>加密 + 风险资产</strong>：比特币 6 万关口 + 币安提现恢复 + 假日交易清淡 → 加密波动放大、需求未修复（Marex 观点）。
+</li>
+</ul>
+<hr>
+<h2 id="s6">五、跨市场传导</h2>
+<ul>
+<li><strong>美 → 中</strong>：30Y 拍卖 5.018%（待核实）+ 半导体设备 +2.36% → 科技反弹延续利好 A 股科技；但美债利率高企压制全球风险资产估值。
+</li>
+<li><strong>欧 → 全球</strong>：德科斯接任 + 鹰派纪要 → 欧元偏强、欧债收益率上行，欧洲出口链承压。
+</li>
+<li><strong>商品 → A股</strong>：碳酸锂 -6.94% → 锂矿股（盛新锂能等）压力；集运欧线 +5.93% → 航运/港口受益；白银 +3.21% + 金价 3566 → 贵金属/有色。
+</li>
+<li><strong>贸易 → 出口链</strong>：301 拟议 + 5G 禁令 → 出口/跨境电商承压，内需替代（半导体国产、光模块）受益。
+</li>
+</ul>
+<hr>
+<h2 id="s7">六、重点交易线索（≤6）</h2>
+<ol>
+<li><strong>A股锂/航运分化</strong>：碳酸锂 -6.94%（锂矿股压力）vs 集运欧线 +5.93%（航运/港口受益）——11/27 日盘验证（11/26 20:11-21:10 + 11/27 07:14-07:25）。
+</li>
+<li><strong>美债 30Y"债王"5.018%</strong>（待核实）：若坐实 → 长久期美债利率风险 + 通胀对冲（商品/黄金）；贝莱德看好中短期美债防御（2Y/10Y 票息 + 通胀挂钩超配）。
+</li>
+<li><strong>油价布伦特 96.57 +6.29%</strong>（单源待核实）：霍尔木兹 + 胡塞袭炼油厂 → 油气/油服板块，若坐实则通胀预期强化。
+</li>
+<li><strong>欧央行紧缩 + 德科斯</strong>：欧元区 12月加息 25bp 预期强化 → 欧元偏强、欧债收益率上行，欧洲出口链承压。
+</li>
+<li><strong>回购增持政策制度化</strong>：四大行 &gt;6000 亿投放 + 利率下调 → A股回购/增持/高股息主题，11/27 盘中验证。
+</li>
+<li><strong>301 关税拟议 + 5G 禁令</strong>：出口链/跨境电商承压、内需替代（半导体国产、光模块）受益；荷兰抵制美《硬件技术管制多边协调法案》→ 阿斯麦供应链风险。
+</li>
+</ol>
+<hr>
+<h2 id="s8">附：风险与待核实</h2>
+<ul>
+<li>美 30Y 拍卖 5.018%、布伦特 96.57、黄仁勋 28 岁员工重组、理想 M 系预售 —— 均为单源或拟议，需交叉验证/官方确认。
+</li>
+<li>同花顺/富途/东财 本窗 oldest 晚于窗口起点（白天 08:01-20:00 未覆盖），该时段依赖新浪 + 华尔街见闻双源。
+</li>
+<li>混合窗（A股 11/26 收盘 + 美 11/25-26 + 期货 11/27 早盘）结论落到最近下一交易时段验证。
+</li>
+</ul>
+</div>
+</body>
+</html>
